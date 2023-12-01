@@ -3,26 +3,23 @@ use days::days_module::day_01::Day01;
 use helpers::read_file;
 use std::time::Instant;
 
-fn test_day(day: &Box<dyn Day>) {
-    // Get the test input for this day.
-    let input_file = format!("example/input/{}", day.get_id());
+fn test_day(day: &Box<dyn Day>, part: &char) {
+    // Get the input.
+    let input_file = format!("example/input/{}{}", day.get_id(), part);
     let input;
     match read_file(input_file) {
         Ok(contents) => input = contents,
         Err(_) => return,
     }
 
-    // Get the first output.
-    let output_a_file = format!("example/output/{}a", day.get_id());
-    match read_file(output_a_file) {
-        Ok(output_a) => day.test_a(&input, &output_a),
-        Err(_) => {}
-    }
-
-    // Get the second output
-    let output_b_file = format!("example/output/{}b", day.get_id());
-    match read_file(output_b_file) {
-        Ok(output_b) => day.test_b(&input, &output_b),
+    // Get the output.
+    let output_file = format!("example/output/{}{}", day.get_id(), part);
+    match read_file(output_file) {
+        Ok(output) => match part {
+            'a' => day.test_a(&input, &output),
+            'b' => day.test_b(&input, &output),
+            _ => {}
+        },
         Err(_) => {}
     }
 }
@@ -47,7 +44,8 @@ fn main() {
     );
     for day in days {
         // First run tests, if any.
-        test_day(&day);
+        test_day(&day, &'a');
+        test_day(&day, &'b');
 
         // Start the timer!
         let now = Instant::now();

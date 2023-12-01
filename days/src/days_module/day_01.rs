@@ -1,7 +1,51 @@
 use crate::days_module::day::Day;
-use helpers::ints_from_string;
 
 pub struct Day01 {}
+
+fn solve(input: &String) -> String {
+    let mut first_number_cache: Option<char> = Option::None;
+    let mut last_number_cache: Option<char> = Option::None;
+    let mut ints: Vec<i32> = Vec::new();
+
+    for input_char in input.chars() {
+        match input_char {
+            '\n' => {
+                ints.push(
+                    format!(
+                        "{}{}",
+                        first_number_cache.unwrap_or_default(),
+                        last_number_cache.unwrap_or_default(),
+                    )
+                    .parse()
+                    .expect("Should be an integer"),
+                );
+                first_number_cache = Option::None;
+            }
+            '0'..='9' => {
+                if first_number_cache.is_none() {
+                    first_number_cache = Option::Some(input_char)
+                }
+                last_number_cache = Option::Some(input_char)
+            }
+            _ => {}
+        }
+    }
+
+    // Handle the last line, that may not have a newline.
+    if first_number_cache.is_some() {
+        ints.push(
+            format!(
+                "{}{}",
+                first_number_cache.unwrap_or_default(),
+                last_number_cache.unwrap_or_default(),
+            )
+            .parse()
+            .expect("Should be an integer"),
+        );
+    }
+
+    ints.iter().sum::<i32>().to_string()
+}
 
 impl Day for Day01 {
     fn get_id(&self) -> String {
@@ -9,50 +53,22 @@ impl Day for Day01 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let window = 1;
-        let inputs = ints_from_string(input);
-
-        let mut count: usize = 0;
-
-        for i in 1..(inputs.len() + 1 - window) {
-            let mut cum_a = 0;
-            for j in (i - 1)..(i - 1 + window) {
-                cum_a += inputs[j];
-            }
-
-            let mut cum_b = 0;
-            for k in i..(i + window) {
-                cum_b += inputs[k];
-            }
-
-            if cum_b > cum_a {
-                count += 1;
-            }
-        }
-        count.to_string()
+        solve(input)
     }
 
     fn part_b(&self, input: &String) -> String {
-        let window = 3;
-        let inputs = ints_from_string(input);
-
-        let mut count: usize = 0;
-
-        for i in 1..(inputs.len() + 1 - window) {
-            let mut cum_a = 0;
-            for j in (i - 1)..(i - 1 + window) {
-                cum_a += inputs[j];
-            }
-
-            let mut cum_b = 0;
-            for k in i..(i + window) {
-                cum_b += inputs[k];
-            }
-
-            if cum_b > cum_a {
-                count += 1;
-            }
-        }
-        count.to_string()
+        // Parse in the integer, leaving the word-version intact on both sides to deal with
+        // overlapping words.
+        let owned_input = input
+            .replace("one", "one1one")
+            .replace("two", "two2two")
+            .replace("three", "three3three")
+            .replace("four", "four4four")
+            .replace("five", "five5five")
+            .replace("six", "six6six")
+            .replace("seven", "seven7seven")
+            .replace("eight", "eight8eight")
+            .replace("nine", "nine9nine");
+        solve(&owned_input)
     }
 }
