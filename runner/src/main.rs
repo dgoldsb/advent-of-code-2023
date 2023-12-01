@@ -1,5 +1,6 @@
 use days::days_module::day::Day;
 use days::days_module::day_01::Day01;
+use days::days_module::day_02::Day02;
 use helpers::read_file;
 use std::time::Instant;
 
@@ -15,6 +16,7 @@ fn execute_day(day: &Box<dyn Day>) -> (String, String) {
 fn main() {
     let mut days: Vec<Box<dyn Day>> = Vec::new();
     days.push(Box::new(Day01 {}));
+    days.push(Box::new(Day02 {}));
 
     let start = Instant::now();
     println!(

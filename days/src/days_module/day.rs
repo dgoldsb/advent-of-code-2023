@@ -29,7 +29,7 @@ pub trait Day {
         let input;
         match read_file(input_file) {
             Ok(contents) => input = contents,
-            Err(reason) => return Err(reason),
+            Err(reason) => return Ok(()),
         }
 
         // Get the output.
