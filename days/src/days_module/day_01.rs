@@ -72,3 +72,18 @@ impl Day for Day01 {
         solve(&owned_input)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_day_a() -> Result<(), String> {
+        Day01 {}.test_day_part(&'a')
+    }
+
+    #[test]
+    fn test_day_b() -> Result<(), String> {
+        Day01 {}.test_day_part(&'b')
+    }
+}

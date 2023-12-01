@@ -3,27 +3,6 @@ use days::days_module::day_01::Day01;
 use helpers::read_file;
 use std::time::Instant;
 
-fn test_day(day: &Box<dyn Day>, part: &char) {
-    // Get the input.
-    let input_file = format!("example/input/{}{}", day.get_id(), part);
-    let input;
-    match read_file(input_file) {
-        Ok(contents) => input = contents,
-        Err(_) => return,
-    }
-
-    // Get the output.
-    let output_file = format!("example/output/{}{}", day.get_id(), part);
-    match read_file(output_file) {
-        Ok(output) => match part {
-            'a' => day.test_a(&input, &output),
-            'b' => day.test_b(&input, &output),
-            _ => {}
-        },
-        Err(_) => {}
-    }
-}
-
 fn execute_day(day: &Box<dyn Day>) -> (String, String) {
     // Get the input for this day.
     let input = read_file(day.get_id()).expect("Expected input to exist");
@@ -43,10 +22,6 @@ fn main() {
         "Day", "Part A", "Part B", "Runtime"
     );
     for day in days {
-        // First run tests, if any.
-        test_day(&day, &'a');
-        test_day(&day, &'b');
-
         // Start the timer!
         let now = Instant::now();
 
