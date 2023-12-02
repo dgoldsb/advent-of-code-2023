@@ -10,3 +10,9 @@ cargo fmt
 cd ../helpers
 cargo fmt
 ```
+
+To run:
+```bash
+cd runner
+cargo run --release
+```
