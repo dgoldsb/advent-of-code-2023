@@ -1,5 +1,6 @@
 use crate::days_module::day::Day;
 use core::num::ParseIntError;
+use std::cmp;
 use std::collections::HashMap;
 
 pub struct Day02 {}
@@ -33,10 +34,24 @@ fn extract_game(game_string: &str) -> Vec<HashMap<String, u32>> {
     rounds
 }
 
-fn is_possible_round(game: &HashMap<String, u32>) -> bool {
-    game.get(&"red".to_string()).unwrap_or(&0) <= &12
-        && game.get(&"green".to_string()).unwrap_or(&0) <= &13
-        && game.get(&"blue".to_string()).unwrap_or(&0) <= &14
+fn is_possible_round(round: &HashMap<String, u32>) -> bool {
+    round.get(&"red".to_string()).unwrap_or(&0) <= &12
+        && round.get(&"green".to_string()).unwrap_or(&0) <= &13
+        && round.get(&"blue".to_string()).unwrap_or(&0) <= &14
+}
+
+fn find_power(game_string: &str) -> u32 {
+    let mut red = 0;
+    let mut green = 0;
+    let mut blue = 0;
+
+    for round in extract_game(game_string) {
+        red = cmp::max(red, *round.get(&"red".to_string()).unwrap_or(&0));
+        green = cmp::max(green, *round.get(&"green".to_string()).unwrap_or(&0));
+        blue = cmp::max(blue, *round.get(&"blue".to_string()).unwrap_or(&0));
+    }
+
+    red * green * blue
 }
 
 impl Day for Day02 {
@@ -57,7 +72,7 @@ impl Day for Day02 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "Not implemented".to_string()
+        input.split("\n").map(find_power).sum::<u32>().to_string()
     }
 }
 
