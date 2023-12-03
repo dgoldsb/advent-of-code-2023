@@ -1,5 +1,5 @@
 use crate::days_module::day::Day;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub struct Day03 {}
 
@@ -83,6 +83,72 @@ fn extract_part_numbers(input: &String) -> Vec<i32> {
     result
 }
 
+// TODO: Deduplicate.
+fn extract_gear_ratios(input: &String) -> Vec<i32> {
+    // First get indices of all gears.
+    let gears = iterate(input)
+        .iter()
+        .filter(|x| x.1 == '*')
+        .map(|x| x.0)
+        .collect::<HashSet<(i32, i32)>>();
+
+    let mut gear_ratios = HashMap::new();
+    let mut multiplication_counts = HashMap::new();
+
+    for gear in &gears {
+        gear_ratios.insert(gear.clone(), 1);
+        multiplication_counts.insert(gear.clone(), 0);
+    }
+
+    // Second pass through the file, persisting only numbers adjacent to a symbol.
+    let mut digit_buffer = Vec::new();
+    let mut index_buffer = HashSet::new();
+    for (index, char_) in iterate(input) {
+        // If index is a new row, then flush buffer if any.
+        // If not a digit, flush buffer.
+        if (index.1 == 0 || !char_.is_digit(10)) && !index_buffer.is_empty() {
+            let moore_buffer = index_buffer
+                .iter()
+                .map(moore_neighborhood)
+                .flatten()
+                .collect::<HashSet<(i32, i32)>>();
+
+            if !moore_buffer.is_disjoint(&gears) {
+                for gear in &gears {
+                    if moore_buffer.contains(gear) {
+                        let number = digit_buffer
+                            .iter()
+                            .cloned()
+                            .collect::<String>()
+                            .parse::<i32>()
+                            .unwrap();
+                        let new_ratio = gear_ratios.get(&gear).unwrap_or(&1) * number;
+                        gear_ratios.insert(*gear, new_ratio);
+                        let new_multiplication_count =
+                            multiplication_counts.get(&gear).unwrap_or(&0) + 1;
+                        multiplication_counts.insert(*gear, new_multiplication_count);
+                    }
+                }
+            }
+
+            index_buffer.clear();
+            digit_buffer.clear();
+        }
+
+        // If it is a digit, add to buffer.
+        if char_.is_digit(10) {
+            digit_buffer.push(char_);
+            index_buffer.insert(index);
+        }
+    }
+
+    gear_ratios
+        .iter()
+        .filter(|x| multiplication_counts.get(x.0).unwrap() == &2)
+        .map(|x| *x.1)
+        .collect()
+}
+
 impl Day for Day03 {
     fn get_id(&self) -> String {
         "day_03".to_string()
@@ -93,7 +159,7 @@ impl Day for Day03 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "Not implemented!".to_string()
+        extract_gear_ratios(input).iter().sum::<i32>().to_string()
     }
 }
 
