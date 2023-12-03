@@ -1,3 +1,4 @@
+pub mod grid;
 use regex::Regex;
 use std::fs;
 
