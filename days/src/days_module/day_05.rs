@@ -69,7 +69,7 @@ impl AlmanacTable {
         // Initial value chosen to check for an open head range.
         let mut previous_end = range.start;
         for (mapped_range, mapped_transformed_range) in mapped_ranges {
-            if mapped_range.start != previous_end {
+            if mapped_range.start > previous_end {
                 result.push(previous_end..mapped_range.start);
             }
 
@@ -78,7 +78,7 @@ impl AlmanacTable {
         }
 
         // Check for an open tail range.
-        if range.end != previous_end {
+        if previous_end < range.end {
             result.push(previous_end..range.end);
         }
 
