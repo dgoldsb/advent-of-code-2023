@@ -1,5 +1,4 @@
 pub mod grid;
-use regex::Regex;
 use std::fs;
 
 pub fn read_file(day: String) -> Result<String, String> {
@@ -20,8 +19,10 @@ pub fn read_file(day: String) -> Result<String, String> {
 }
 
 pub fn ints_from_string(input: &str) -> Vec<isize> {
-    let re = Regex::new(r"([-+]?\d+)\D?").unwrap();
-    re.captures_iter(input)
-        .map(|c| c[1].parse().expect("Something went wrong parsing an int"))
-        .collect()
+    input
+        .split(" ")
+        .map(|s| s.parse())
+        .filter(|r| r.is_ok())
+        .map(|r| r.unwrap())
+        .collect::<Vec<isize>>()
 }

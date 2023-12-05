@@ -1,11 +1,10 @@
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
+use rayon::prelude::*;
 use std::cmp::{max, min};
 use std::collections::HashMap;
 use std::ops::Range;
 use std::str::FromStr;
-
-// TODO: Check clones, that probably is costing precious time.
 
 struct AlmanacRule {
     input_range: Range<isize>,
@@ -159,7 +158,7 @@ fn solve(input: &String, part_a: bool) -> String {
 
     // Solve.
     seed_ranges
-        .iter()
+        .par_iter()
         .map(|x| find_lowest_location(x.clone(), "seed".to_string(), &almanac_registry))
         .min()
         .unwrap()
