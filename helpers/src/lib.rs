@@ -19,7 +19,7 @@ pub fn read_file(day: String) -> Result<String, String> {
     }
 }
 
-pub fn ints_from_string(input: &String) -> Vec<isize> {
+pub fn ints_from_string(input: &str) -> Vec<isize> {
     let re = Regex::new(r"([-+]?\d+)\D?").unwrap();
     re.captures_iter(input)
         .map(|c| c[1].parse().expect("Something went wrong parsing an int"))
