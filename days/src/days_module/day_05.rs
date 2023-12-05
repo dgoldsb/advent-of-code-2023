@@ -1,7 +1,7 @@
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
-use std::collections::{HashMap, HashSet};
-use std::ops::{Index, Range};
+use std::collections::HashMap;
+use std::ops::Range;
 use std::str::FromStr;
 
 struct AlmanacRule {
@@ -39,16 +39,15 @@ struct AlmanacTable {
     rules: Vec<AlmanacRule>,
 }
 
-impl Index<&'_ isize> for AlmanacTable {
-    type Output = isize;
-    fn index(&self, i: &isize) -> &isize {
+impl AlmanacTable {
+    fn transform(&self, i: &isize) -> Result<isize, ()> {
         for rule in &self.rules {
             let result = rule.transform(i);
             if result.is_ok() {
-                return &result.unwrap();
+                return result;
             }
         }
-        panic!("No rule supports this input")
+        Err(())
     }
 }
 
@@ -75,13 +74,13 @@ impl FromStr for AlmanacTable {
     }
 }
 
-fn exhaust_maps(seed: isize, almanac_registry: &HashMap<String, AlmanacTable>) -> isize {
-    let mut result = seed;
+fn exhaust_maps(seed: &isize, almanac_registry: &HashMap<String, AlmanacTable>) -> isize {
+    let mut result = seed.clone();
     let mut state = "seed".to_string();
     while state != "location" {
         let current_almanac = &almanac_registry[&state];
         state = current_almanac.to.clone();
-        result = current_almanac[&result];
+        result = current_almanac.transform(&result).unwrap_or(result);
     }
     result
 }
@@ -106,7 +105,12 @@ impl Day for Day05 {
             .collect::<HashMap<String, AlmanacTable>>();
 
         // Find the lowest location map. location
-        "Not implemented".to_string()
+        seeds
+            .iter()
+            .map(|s| exhaust_maps(s, &almanac_registry))
+            .min()
+            .unwrap()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
