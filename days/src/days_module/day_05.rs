@@ -1,8 +1,11 @@
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
+use std::cmp::{max, min};
 use std::collections::HashMap;
 use std::ops::Range;
 use std::str::FromStr;
+
+// TODO: Check clones, that probably is costing precious time.
 
 struct AlmanacRule {
     input_range: Range<isize>,
@@ -10,11 +13,19 @@ struct AlmanacRule {
 }
 
 impl AlmanacRule {
-    fn transform(&self, input: &isize) -> Result<isize, ()> {
-        if self.input_range.contains(input) {
-            return Ok(input - self.input_range.start + self.delta);
+    // Returns a series of original ranges, and the new range with the delta applied.
+    fn transform_range(&self, range: &Range<isize>) -> Result<(Range<isize>, Range<isize>), ()> {
+        let range_start = max(range.start, self.input_range.start);
+        let range_end = min(range.end, self.input_range.end);
+        if range_start < range_end {
+            Ok((
+                range_start..range_end,
+                (range_start - self.input_range.start + self.delta)
+                    ..(range_end - self.input_range.start + self.delta),
+            ))
+        } else {
+            Err(())
         }
-        Err(())
     }
 }
 
@@ -40,14 +51,39 @@ struct AlmanacTable {
 }
 
 impl AlmanacTable {
-    fn transform(&self, i: &isize) -> Result<isize, ()> {
-        for rule in &self.rules {
-            let result = rule.transform(i);
-            if result.is_ok() {
-                return result;
+    fn transform_range(&self, range: Range<isize>) -> Vec<Range<isize>> {
+        let mut result = Vec::new();
+
+        // Check which sub-ranges are mappable.
+        let mut mapped_ranges = self
+            .rules
+            .iter()
+            .map(|r| r.transform_range(&range))
+            .filter(|r| r.is_ok())
+            .map(|r| r.unwrap())
+            .collect::<Vec<(Range<isize>, Range<isize>)>>();
+
+        // Create identity ranges for the non-mappable pieces.
+        mapped_ranges.sort_by(|a, b| a.0.start.partial_cmp(&b.0.start).unwrap());
+
+        // Initial value chosen to check for an open head range.
+        let mut previous_end = range.start;
+        for (mapped_range, mapped_transformed_range) in mapped_ranges {
+            if mapped_range.start != previous_end {
+                result.push(previous_end..mapped_range.start);
             }
+
+            previous_end = range.end;
+            result.push(mapped_transformed_range);
         }
-        Err(())
+
+        // Check for an open tail range.
+        if range.end != previous_end {
+            result.push(previous_end..range.end);
+        }
+
+        // Return the new collection of ranges.
+        result
     }
 }
 
@@ -74,15 +110,60 @@ impl FromStr for AlmanacTable {
     }
 }
 
-fn exhaust_maps(seed: &isize, almanac_registry: &HashMap<String, AlmanacTable>) -> isize {
-    let mut result = seed.clone();
-    let mut state = "seed".to_string();
-    while state != "location" {
-        let current_almanac = &almanac_registry[&state];
-        state = current_almanac.to.clone();
-        result = current_almanac.transform(&result).unwrap_or(result);
+fn find_lowest_location(
+    range: Range<isize>,
+    key: String,
+    almanac_registry: &HashMap<String, AlmanacTable>,
+) -> isize {
+    if key == "location" {
+        // The end of recursion!
+        return range.start;
     }
-    result
+
+    // Get 1 or more ranges from our almanacs.
+    let current_almanac = &almanac_registry[&key];
+    let ranges: Vec<Range<isize>> = current_almanac.transform_range(range);
+
+    // Find the lowest of all the range starts.
+    let next_location = current_almanac.to.clone();
+    ranges
+        .iter()
+        .map(|r| find_lowest_location(r.clone(), next_location.clone(), almanac_registry))
+        .min()
+        .unwrap()
+}
+
+fn solve(input: &String, part_a: bool) -> String {
+    let mut input_iterator = input.split("\n\n");
+
+    // Find the seed ranges.
+    let mut seeds = ints_from_string(input_iterator.next().unwrap());
+    let mut seed_ranges = Vec::new();
+    while !seeds.is_empty() {
+        let length = seeds.pop().unwrap();
+        if part_a {
+            seed_ranges.push(length..(length + 1));
+        } else {
+            let start = seeds.pop().unwrap();
+            seed_ranges.push(start..(start + length));
+        }
+    }
+
+    // Parse the almanac.
+    let almanac_registry = input_iterator
+        .map(|s| AlmanacTable::from_str(s))
+        .filter(|r| r.is_ok())
+        .map(|r| r.unwrap())
+        .map(|a| (a.from.clone(), a))
+        .collect::<HashMap<String, AlmanacTable>>();
+
+    // Solve.
+    seed_ranges
+        .iter()
+        .map(|x| find_lowest_location(x.clone(), "seed".to_string(), &almanac_registry))
+        .min()
+        .unwrap()
+        .to_string()
 }
 
 pub struct Day05 {}
@@ -93,28 +174,11 @@ impl Day for Day05 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let mut input_iterator = input.split("\n\n");
-
-        let seeds = ints_from_string(input_iterator.next().unwrap());
-
-        let almanac_registry = input_iterator
-            .map(|s| AlmanacTable::from_str(s))
-            .filter(|r| r.is_ok())
-            .map(|r| r.unwrap())
-            .map(|a| (a.from.clone(), a))
-            .collect::<HashMap<String, AlmanacTable>>();
-
-        // Find the lowest location map. location
-        seeds
-            .iter()
-            .map(|s| exhaust_maps(s, &almanac_registry))
-            .min()
-            .unwrap()
-            .to_string()
+        solve(input, true)
     }
 
     fn part_b(&self, input: &String) -> String {
-        "Not implemented".to_string()
+        solve(input, false)
     }
 }
 
