@@ -66,15 +66,17 @@ impl PartialOrd for HandOfCards {
             }
         }
 
-        let hand_type_ordering = self.find_hand_type().cmp(&other.find_hand_type());
-        if hand_type_ordering != Ordering::Equal {
-            return Some(hand_type_ordering);
+        match self.find_hand_type().cmp(&other.find_hand_type()) {
+            Ordering::Equal => {},
+            Ordering::Greater => return Some(Ordering::Greater),
+            Ordering::Less => return Some(Ordering::Less),
         }
 
         for (own, other) in zip(&self.cards, &other.cards) {
-            let card_type_ordering = card_value(own).cmp(&card_value(other));
-            if card_type_ordering != Ordering::Equal {
-                return Some(card_type_ordering);
+            match card_value(own).cmp(&card_value(other)) {
+                Ordering::Equal => {},
+                Ordering::Greater => return Some(Ordering::Greater),
+                Ordering::Less => return Some(Ordering::Less),
             }
         }
 

@@ -1,6 +1,5 @@
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
-use std::collections::{HashMap, HashSet};
 use std::iter::zip;
 
 // Solve ABC-formula.
