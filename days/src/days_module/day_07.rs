@@ -35,7 +35,7 @@ impl HandOfCards {
             "113" => 4,
             "122" => 3,
             "1112" => 2,
-            "11111" => 2,
+            "11111" => 1,
             _ => panic!("Weird hand..."),
         }
     }
@@ -90,6 +90,8 @@ impl Day for Day07 {
     }
 
     fn part_a(&self, input: &String) -> String {
+        // Too low 249806759
+        // Too high 251964541
         let mut hands = input
             .split("\n")
             .map(HandOfCards::from_str)
