@@ -26,3 +26,23 @@ pub fn ints_from_string(input: &str) -> Vec<isize> {
         .map(|r| r.unwrap())
         .collect::<Vec<isize>>()
 }
+
+fn gcd(a: u128, b: u128) -> u128 {
+    if b == 0 {
+        return a;
+    }
+    gcd(b, a % b)
+}
+
+fn multi_gcd(nums: &Vec<u128>, idx: usize) -> u128 {
+    if idx == nums.len() - 1 {
+        return nums[idx];
+    }
+    let a = nums[idx];
+    let b = multi_gcd(nums, idx + 1);
+    return gcd(a, b);
+}
+
+pub fn lcm(nums: Vec<u128>) -> u128 {
+    nums.iter().product::<u128>() / multi_gcd(&nums, 0)
+}
