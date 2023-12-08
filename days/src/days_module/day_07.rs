@@ -39,9 +39,11 @@ impl HandOfCardsAlternative {
         if last_index == 0 {
             values_vec = ["5".to_string()].to_vec()
         } else {
-            values_vec[last_index - 1] = format!("{}", (values_vec[last_index - 1].parse::<usize>().unwrap() + joker_count));
+            values_vec[last_index - 1] = format!(
+                "{}",
+                (values_vec[last_index - 1].parse::<usize>().unwrap() + joker_count)
+            );
         }
-
 
         let signature = values_vec.iter().fold("".to_string(), |s, a| s + a);
 
@@ -84,14 +86,14 @@ impl PartialOrd for HandOfCardsAlternative {
         }
 
         match self.find_hand_type().cmp(&other.find_hand_type()) {
-            Ordering::Equal => {},
+            Ordering::Equal => {}
             Ordering::Greater => return Some(Ordering::Greater),
             Ordering::Less => return Some(Ordering::Less),
         }
 
         for (own, other) in zip(&self.cards, &other.cards) {
             match card_value(own).cmp(&card_value(other)) {
-                Ordering::Equal => {},
+                Ordering::Equal => {}
                 Ordering::Greater => return Some(Ordering::Greater),
                 Ordering::Less => return Some(Ordering::Less),
             }
@@ -162,14 +164,14 @@ impl PartialOrd for HandOfCards {
         }
 
         match self.find_hand_type().cmp(&other.find_hand_type()) {
-            Ordering::Equal => {},
+            Ordering::Equal => {}
             Ordering::Greater => return Some(Ordering::Greater),
             Ordering::Less => return Some(Ordering::Less),
         }
 
         for (own, other) in zip(&self.cards, &other.cards) {
             match card_value(own).cmp(&card_value(other)) {
-                Ordering::Equal => {},
+                Ordering::Equal => {}
                 Ordering::Greater => return Some(Ordering::Greater),
                 Ordering::Less => return Some(Ordering::Less),
             }

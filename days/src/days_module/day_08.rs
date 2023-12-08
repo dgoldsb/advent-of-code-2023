@@ -1,18 +1,6 @@
 use crate::days_module::day::Day;
 use std::collections::HashMap;
 
-struct Node<'a> {
-    label: String,
-    // Order matters.
-    neighbors: Vec<&'a Node<'a>>,
-}
-
-impl<'a> Node<'a> {
-    fn add_neighbor<'b>(&'b mut self, neighbor: &'b Node) where 'b: 'a {
-        self.neighbors.push(neighbor);
-    }
-}
-
 pub struct Day08 {}
 
 impl Day for Day08 {
@@ -23,36 +11,43 @@ impl Day for Day08 {
     fn part_a(&self, input: &String) -> String {
         let mut input_split = input.split("\n\n");
 
-        let instructions = input_split.next().unwrap();
+        let instructions = input_split.next().unwrap().chars().collect::<Vec<char>>();
+        let raw_neigbors = input_split.next().unwrap();
 
-        let mut node_map = HashMap::new();
-
-        for line in input.split("\n") {
-            let label = line.split(" ").next().unwrap().to_string();
-            node_map.insert(label.clone(), Node { label, neighbors: Vec::new() });
-        }
-
-
-        for line in input.split("\n") {
+        let mut neighbor_map = HashMap::new();
+        for line in raw_neigbors.split("\n") {
             let nicer_line = line.replace(" = (", ", ").replace(")", "");
             let mut nicer_line_split = nicer_line.split(", ");
 
-            let label = nicer_line_split.next().unwrap();
-            let left = nicer_line_split.next().unwrap();
-            let right = nicer_line_split.next().unwrap();
+            let label = nicer_line_split.next().unwrap().to_string();
+            let left = nicer_line_split.next().unwrap().to_string();
+            let right = nicer_line_split.next().unwrap().to_string();
 
-            let node:  &mut Node<'_> = node_map.get_mut(label).unwrap();
-            node.add_neighbor(node_map.get(left).unwrap());
-            node.add_neighbor(node_map.get(right).unwrap());
+            neighbor_map.insert(label, (left, right));
         }
 
-        let start_node = node_map.get("AAA").expect("Expecting start node AAA");
+        let mut steps = 0;
+        let mut current_node = "AAA";
+        loop {
+            let instruction = instructions[steps % instructions.len()];
+            let neighbors = neighbor_map.get(current_node).unwrap();
+            current_node = match instruction {
+                'L' => &neighbors.0,
+                'R' => &neighbors.1,
+                _ => panic!(),
+            };
+            steps += 1;
 
-        return "Not implemented".to_string()
+            if current_node == "ZZZ" {
+                break;
+            }
+        }
+
+        steps.to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        return "Not implemented".to_string()
+        return "Not implemented".to_string();
     }
 }
 
