@@ -8,6 +8,7 @@ use days::days_module::day_06::Day06;
 use days::days_module::day_07::Day07;
 use days::days_module::day_08::Day08;
 use days::days_module::day_09::Day09;
+use days::days_module::day_10::Day10;
 use helpers::read_file;
 use std::time::Instant;
 
@@ -31,6 +32,7 @@ fn main() {
     days.push(Box::new(Day07 {}));
     days.push(Box::new(Day08 {}));
     days.push(Box::new(Day09 {}));
+    days.push(Box::new(Day10 {}));
 
     let start = Instant::now();
     println!(

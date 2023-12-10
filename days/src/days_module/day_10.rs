@@ -1,75 +1,75 @@
 use crate::days_module::day::Day;
-use helpers::ints_from_string;
+use std::collections::{HashMap, HashSet};
 
-pub struct Day09 {}
-
-fn extrapolate_delta(series: &Vec<isize>) -> isize {
-    // Base case.
-    if series.iter().all(|i| i == &0) {
-        return 0;
+// TODO: Put on struct?
+fn find_char_index<'a>(target: char, map: &'a HashMap<(isize, isize), char>) -> &'a (isize, isize) {
+    for (key, val) in map.iter() {
+        if val == &target {
+            return key
+        }
     }
-
-    // Recurse.
-    let differences = series
-        .iter()
-        .zip(series.iter().skip(1))
-        .map(|(a, b)| b - a)
-        .collect::<Vec<isize>>();
-    let delta = extrapolate_delta(&differences);
-    let last_difference = *differences.last().unwrap();
-    return last_difference + delta;
+    panic!("Target not found!")
 }
 
-fn extrapolate(series: &Vec<isize>) -> isize {
-    let last_number = *series.last().unwrap();
-    let delta = extrapolate_delta(series);
-    last_number + delta
-}
-
-fn extrapolate_delta_backwards(series: &Vec<isize>) -> isize {
-    // Base case.
-    if series.iter().all(|i| i == &0) {
-        return 0;
+pub fn parse_char_map(input: &String) -> HashMap<(isize, isize), char> {
+    let mut map = HashMap::new();
+    for (i, l) in input.split("\n").enumerate() {
+        for (j, v) in l.chars().enumerate() {
+            map.insert((i as isize, j as isize), v.clone());
+        }
     }
-
-    // Recurse.
-    let differences = series
-        .iter()
-        .zip(series.iter().skip(1))
-        .map(|(a, b)| b - a)
-        .collect::<Vec<isize>>();
-    let delta = extrapolate_delta_backwards(&differences);
-    let first_difference = *differences.first().unwrap();
-    return first_difference - delta;
+    map
 }
 
-fn extrapolate_backwards(series: &Vec<isize>) -> isize {
-    let first_number = *series.first().unwrap();
-    let delta = extrapolate_delta_backwards(series);
-    first_number - delta
+fn get_neighbors(pipe: &char, index: &(isize, isize)) -> Vec<(isize, isize)> {
+    match pipe {
+        '|' => {vec![(index.0 + 1, index.1), (index.0 - 1, index.1)]},
+        '-' => {vec![(index.0, index.1 + 1), (index.0, index.1 - 1)]},
+        'L' => {vec![(index.0 - 1, index.1), (index.0, index.1 + 1)]},
+        'J' => {vec![(index.0 - 1, index.1), (index.0, index.1 - 1)]},
+        '7' => {vec![(index.0 + 1, index.1), (index.0, index.1 - 1)]},
+        'F' => {vec![(index.0 + 1, index.1), (index.0, index.1 + 1)]},
+        _ => panic!("Invalid pipe piece!"),
+    }
 }
 
-impl Day for Day09 {
+pub struct Day10 {}
+
+impl Day for Day10 {
     fn get_id(&self) -> String {
-        "day_09".to_string()
+        "day_10".to_string()
     }
 
     fn part_a(&self, input: &String) -> String {
-        input
-            .split("\n")
-            .map(ints_from_string)
-            .map(|s| extrapolate(&s))
-            .sum::<isize>()
-            .to_string()
+        let map = parse_char_map(input);
+
+        let mut visited = HashSet::new();
+        let mut index = find_char_index('S', &map).clone();
+        // TODO: Replace with starting char.
+        let mut char_ = '7';
+
+        loop {
+            visited.insert(index.clone());
+
+            let mut updated = false;
+            for neighbor in get_neighbors(&char_, &index) {
+                if !visited.contains(&neighbor) {
+                    index = neighbor;
+                    char_ = *map.get(&index).unwrap();
+                    updated = true;
+                }
+            }
+
+            if updated == false {
+                break
+            }
+        }
+
+        (visited.len() / 2).to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        input
-            .split("\n")
-            .map(ints_from_string)
-            .map(|s| extrapolate_backwards(&s))
-            .sum::<isize>()
-            .to_string()
+        "".to_string()
     }
 }
 
@@ -79,11 +79,11 @@ mod tests {
 
     #[test]
     fn test_day_a() -> Result<(), String> {
-        Day09 {}.test_day_part(&'a')
+        Day10 {}.test_day_part(&'a')
     }
 
     #[test]
     fn test_day_b() -> Result<(), String> {
-        Day09 {}.test_day_part(&'b')
+        Day10 {}.test_day_part(&'b')
     }
 }
