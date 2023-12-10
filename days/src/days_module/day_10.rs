@@ -1,6 +1,34 @@
 use crate::days_module::day::Day;
 use std::collections::{HashMap, HashSet};
 
+fn find_starting_char(index: &(isize, isize), map: &HashMap<(isize, isize), char>) -> char {
+    let default = '.';
+    let up = map.get(&(index.0 - 1, index.1)).unwrap_or(&default);
+    let down = map.get(&(index.0 + 1, index.1)).unwrap_or(&default);
+    let left = map.get(&(index.0, index.1 - 1)).unwrap_or(&default);
+    let right = map.get(&(index.0, index.1 + 1)).unwrap_or(&default);
+
+    if vec!['L', 'F', '-'].contains(left) {
+        if vec!['F', '7', '|'].contains(up) {
+            return 'J';
+        } else if vec!['7', 'J', '-'].contains(right) {
+            return '-';
+        } else {
+            return '7';
+        }
+    }
+
+    if vec!['F', '7', '|'].contains(up) {
+        if vec!['L', 'J', '|'].contains(down) {
+            return '|';
+        } else {
+            return 'L';
+        }
+    }
+
+    return 'F';
+}
+
 fn find_char_index<'a>(target: char, map: &'a HashMap<(isize, isize), char>) -> &'a (isize, isize) {
     map.iter()
         .filter(|(_, v)| *v == &target)
@@ -46,9 +74,7 @@ fn get_neighbors(pipe: &char, index: &(isize, isize)) -> Vec<(isize, isize)> {
 fn find_loop(map: &HashMap<(isize, isize), char>) -> HashSet<(isize, isize)> {
     let mut visited = HashSet::new();
     let mut index = find_char_index('S', &map).clone();
-
-    // TODO: Replace with starting char.
-    let mut char_ = '7';
+    let mut char_ = find_starting_char(&index, map);
 
     loop {
         visited.insert(index.clone());
