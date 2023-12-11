@@ -34,9 +34,8 @@ fn solve(input: &String, multiplier: usize) -> usize {
         line_length = line.len();
         for (y, char_) in line.chars().enumerate() {
             if char_ == '#' {
-                let x_shift = empty_x.iter().filter(|x_empty| **x_empty < x).count() * multiplier;
-                let y_shift = empty_y.iter().filter(|y_empty| **y_empty < y).count() * multiplier;
-
+                let x_shift = empty_x.iter().filter(|x_empty| **x_empty < x).count() * (multiplier - 1);
+                let y_shift = empty_y.iter().filter(|y_empty| **y_empty < y).count() * (multiplier - 1);
                 coordinates.push((x + x_shift, y + y_shift));
             }
         }
