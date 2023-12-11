@@ -1,6 +1,5 @@
 use crate::days_module::day::Day;
 
-
 pub struct Day12 {}
 
 impl Day for Day12 {

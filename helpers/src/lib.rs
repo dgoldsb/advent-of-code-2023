@@ -1,4 +1,5 @@
 pub mod grid;
+use std::cmp::{max, min};
 use std::fs;
 
 pub fn read_file(day: String) -> Result<String, String> {
@@ -45,4 +46,8 @@ fn multi_gcd(nums: &Vec<u128>, idx: usize) -> u128 {
 
 pub fn lcm(nums: Vec<u128>) -> u128 {
     nums.iter().product::<u128>() / multi_gcd(&nums, 0)
+}
+
+pub fn manhattan_distance(start: &(usize, usize), end: &(usize, usize)) -> usize {
+    (max(start.0, end.0) - min(start.0, end.0)) + (max(start.1, end.1) - min(start.1, end.1))
 }
