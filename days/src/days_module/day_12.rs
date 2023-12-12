@@ -1,4 +1,5 @@
 use crate::days_module::day::Day;
+use rayon::prelude::*;
 
 fn calculate_checksum(configuration: &Vec<char>) -> Vec<usize> {
     let mut streak = 0;
@@ -98,6 +99,17 @@ fn parse_line(line: &str) -> (Vec<char>, Vec<usize>) {
     (configuration, reference)
 }
 
+fn multiply_vector<T>(input: Vec<T>, multiplier: usize) -> Vec<T>
+where
+    T: Copy,
+{
+    let mut result: Vec<T> = Vec::new();
+    for _ in 0..multiplier {
+        result.extend(input.clone())
+    }
+    result
+}
+
 pub struct Day12 {}
 
 impl Day for Day12 {
@@ -106,16 +118,28 @@ impl Day for Day12 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        input
+        let inputs = input
             .split("\n")
             .map(parse_line)
+            .collect::<Vec<(Vec<char>, Vec<usize>)>>();
+        inputs
+            .par_iter()
             .map(|t| count_configuration(&t.0, &t.1, None))
             .sum::<usize>()
             .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        "0".to_string()
+        let inputs = input
+            .split("\n")
+            .map(parse_line)
+            .map(|(c, r)| (multiply_vector(c, 5), multiply_vector(r, 5)))
+            .collect::<Vec<(Vec<char>, Vec<usize>)>>();
+        inputs
+            .par_iter()
+            .map(|t| count_configuration(&t.0, &t.1, None))
+            .sum::<usize>()
+            .to_string()
     }
 }
 
