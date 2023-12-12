@@ -31,7 +31,6 @@ fn solve(input: &String, multiplier: usize) -> usize {
     // Find coordinates, shifted.
     let mut coordinates = Vec::new();
     for (x, line) in input.split("\n").enumerate() {
-        line_length = line.len();
         for (y, char_) in line.chars().enumerate() {
             if char_ == '#' {
                 let x_shift =
