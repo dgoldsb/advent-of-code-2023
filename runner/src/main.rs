@@ -37,7 +37,7 @@ fn main() {
     days.push(Box::new(Day09 {}));
     days.push(Box::new(Day10 {}));
     days.push(Box::new(Day11 {}));
-    // days.push(Box::new(Day12 {}));
+    days.push(Box::new(Day12 {}));
     days.push(Box::new(Day13 {}));
 
     let start = Instant::now();

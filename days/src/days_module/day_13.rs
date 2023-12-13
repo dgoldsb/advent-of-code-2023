@@ -20,30 +20,40 @@ fn score_image(image: &str) -> (i32, i32) {
     for y_mirror in 1..i32::MAX {
         let shifted = points
             .iter()
-            .map(|point| GridIndex { x: mirror(point.x, y_mirror), y: point.y })
+            .map(|point| GridIndex {
+                x: mirror(point.x, y_mirror),
+                y: point.y,
+            })
             .collect::<HashSet<GridIndex>>();
 
         let left_of_mirror = shifted
             .iter()
             .filter(|point| point.x < 0)
-            .map(|point| GridIndex { x: point.x.abs(), y: point.y })
+            .map(|point| GridIndex {
+                x: point.x.abs(),
+                y: point.y,
+            })
             .collect::<HashSet<GridIndex>>();
 
         let right_of_mirror = shifted
             .iter()
             .filter(|point| point.x >= 0)
-            .map(|point| GridIndex { x: point.x + 1, y: point.y })
+            .map(|point| GridIndex {
+                x: point.x + 1,
+                y: point.y,
+            })
             .collect::<HashSet<GridIndex>>();
 
         if right_of_mirror.is_empty() {
-            break
+            break;
         }
 
         if left_of_mirror.is_empty() {
-            continue
+            continue;
         }
 
-        if right_of_mirror.is_subset(&left_of_mirror) || left_of_mirror.is_subset(&right_of_mirror) {
+        if right_of_mirror.is_subset(&left_of_mirror) || left_of_mirror.is_subset(&right_of_mirror)
+        {
             return (y_mirror, 0);
         }
     }
@@ -52,30 +62,40 @@ fn score_image(image: &str) -> (i32, i32) {
     for x_mirror in 1..i32::MAX {
         let shifted = points
             .iter()
-            .map(|point| GridIndex { x: point.x, y: mirror(point.y, x_mirror) })
+            .map(|point| GridIndex {
+                x: point.x,
+                y: mirror(point.y, x_mirror),
+            })
             .collect::<HashSet<GridIndex>>();
 
         let left_of_mirror = shifted
             .iter()
             .filter(|point| point.y < 0)
-            .map(|point| GridIndex { x: point.x, y: point.y.abs() })
+            .map(|point| GridIndex {
+                x: point.x,
+                y: point.y.abs(),
+            })
             .collect::<HashSet<GridIndex>>();
 
         let right_of_mirror = shifted
             .iter()
             .filter(|point| point.y >= 0)
-            .map(|point| GridIndex { x: point.x, y: point.y + 1 })
+            .map(|point| GridIndex {
+                x: point.x,
+                y: point.y + 1,
+            })
             .collect::<HashSet<GridIndex>>();
 
         if right_of_mirror.is_empty() {
-            break
+            break;
         }
 
         if left_of_mirror.is_empty() {
-            continue
+            continue;
         }
 
-        if right_of_mirror.is_subset(&left_of_mirror) || left_of_mirror.is_subset(&right_of_mirror) {
+        if right_of_mirror.is_subset(&left_of_mirror) || left_of_mirror.is_subset(&right_of_mirror)
+        {
             return (0, x_mirror);
         }
     }

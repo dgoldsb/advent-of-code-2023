@@ -1,142 +1,79 @@
 use crate::days_module::day::Day;
 use rayon::prelude::*;
 
-// TODO: Caching pays for sure.
-// TODO: Clean up the cloning, all slice based.
+fn can_put_down_group(template: &str, group_size: usize) -> bool {
+    if template.len() < group_size {
+        return false;
+    }
+    let group_fits = template[0..group_size].chars().all(|c| c != '.');
+    let terminator_fits = template.chars().nth(group_size).unwrap_or('.') != '#';
+    group_fits && terminator_fits
+}
+
 // Recursive function.
-// TODO: Some of these clauses may be redundant.
+// TODO: Cache.
+// TODO: I could deduplicate code here, and make it more elegant.
 fn count_configurations(template: &str, remaining_groups: &[usize]) -> usize {
-    // If we run out of groups, we check if the remainder contains no springs.
-    if remaining_groups.is_empty() {
-        if template.chars().filter(|c| *c == '#').count() == 0 {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    if template.chars().all(|c| c != '.')
-        && template.chars().filter(|c| *c != '.').count() == remaining_groups.iter().sum()
-    {
-        // If we have one left, we win!
-        // If we have multiple groups that fit exactly, return 0.
-        if remaining_groups.len() == 1 {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    // If there are less `#` + `?` left than group sizes, we fail.
-    if template.chars().filter(|c| *c != '.').count() < remaining_groups.iter().sum() {
-        return 0;
-    }
-
-    // We have two options: consume a group at the next `?`, or place a `.` spring.
-    let mut remaining_groups_iter = remaining_groups.iter();
-    let mut next_group_size = remaining_groups_iter.next().unwrap();
-    let mut active_group = 0;
-
-    // Fast forwarding we do after we place a group.
-    let mut fast_forwarding = false;
-
-    for (index, char) in template.chars().enumerate() {
-        let placing_group = active_group > 0;
-
-        // Leading empty spaces we might as well skip...
-        if char == '.' {
-            // ... unless we are grouping, then we fail!
-            if placing_group {
-                // ... unless our group is the right size, then we fast-forward!
-                if *next_group_size == active_group {
-                    active_group = 0;
-                    fast_forwarding = true;
+    let next_group_size = remaining_groups.iter().next();
+    match template.chars().nth(0) {
+        Some('#') => {
+            if next_group_size.is_none() {
+                0
+            } else {
+                if can_put_down_group(template, *next_group_size.unwrap()) {
+                    if template.len() > *next_group_size.unwrap() {
+                        count_configurations(
+                            &template[(next_group_size.unwrap() + 1)..],
+                            &remaining_groups[1..],
+                        )
+                    } else {
+                        if remaining_groups.len() == 1 {
+                            1
+                        } else {
+                            0
+                        }
+                    }
                 } else {
-                    return 0;
+                    0
                 }
             }
-            continue;
         }
-        // A `#` has us consume our next group.
-        else if char == '#' || (placing_group && char == '?' && active_group < *next_group_size) {
-            // If we are consuming, but our next group is too small, we messed up.
-            if active_group == *next_group_size {
-                return 0;
-            }
-
-            // We can go back from fastforwarding to consuming.
-            if fast_forwarding {
-                fast_forwarding = false;
-                let next_group_size_option = remaining_groups_iter.next();
-                // But if we have no groups left, then there is no options!
-                if next_group_size_option.is_none() {
-                    return 0;
+        Some('.') => count_configurations(&template[1..], remaining_groups),
+        Some('?') => {
+            let fill_sum = if next_group_size.is_none() {
+                0
+            } else {
+                if can_put_down_group(template, *next_group_size.unwrap()) {
+                    if template.len() > *next_group_size.unwrap() {
+                        count_configurations(
+                            &template[(next_group_size.unwrap() + 1)..],
+                            &remaining_groups[1..],
+                        )
+                    } else {
+                        if remaining_groups.len() == 1 {
+                            1
+                        } else {
+                            0
+                        }
+                    }
                 } else {
-                    next_group_size = next_group_size_option.unwrap()
+                    0
                 }
-            }
+            };
+            let empty_sum = count_configurations(&template[1..], remaining_groups);
 
-            // Always consume.
-            active_group += 1;
+            fill_sum + empty_sum
         }
-        // A `?` finally has us go into recursion, potentially.
-        else if char == '?' {
-            let mut sum = 0;
-
-            // Collect back all remaining groups.
-            let foo = remaining_groups_iter.map(|u| *u).collect::<Vec<usize>>();
-            let recurse_remaining_groups = vec![next_group_size.clone()]
-                .iter()
-                .chain(foo.iter())
-                .map(|u| *u)
-                .collect::<Vec<usize>>();
-
-            // Place a `.`.
-            if active_group == 0 {
-                let increase_a =
-                    count_configurations(&template[(index + 1)..], &recurse_remaining_groups);
-                sum += increase_a;
+        None => {
+            // Terminal condition.
+            if remaining_groups.is_empty() {
+                1
+            } else {
+                0
             }
-            // Definitely place a `.` if we can finish the active group.
-            else if active_group == *next_group_size {
-                let increase_b =
-                    count_configurations(&template[(index + 1)..], &recurse_remaining_groups[1..]);
-                sum += increase_b;
-            }
-
-            // Try to place the next group, or extend one.
-            let mut success = true;
-            for i in 0..(*next_group_size - active_group) {
-                if template.chars().nth(index + i).unwrap() == '.' {
-                    success = false
-                }
-            }
-            if template
-                .chars()
-                .nth(index + next_group_size - active_group)
-                .is_some()
-                && template
-                    .chars()
-                    .nth(index + next_group_size - active_group)
-                    .unwrap()
-                    == '#'
-            {
-                success = false
-            }
-
-            // Second clause to avoid duplicate counting.
-            if success && !(active_group == *next_group_size) {
-                let increase_c = count_configurations(
-                    &template[(index + next_group_size + 1)..],
-                    &recurse_remaining_groups[1..],
-                );
-                sum += increase_c;
-            }
-
-            return sum;
         }
+        _ => panic!("Unknown character"),
     }
-    1
 }
 
 fn parse_line<'a>(line: &'a str) -> (&'a str, Vec<usize>) {
