@@ -44,6 +44,30 @@ fn multi_gcd(nums: &Vec<u128>, idx: usize) -> u128 {
     return gcd(a, b);
 }
 
+pub fn transpose_string(input: &str) -> String {
+    let lines: Vec<&str> = input.lines().collect();
+
+    if lines.is_empty() {
+        // If there are no lines, there's nothing to transpose
+        return String::new();
+    }
+
+    let num_lines = lines.len();
+    let max_line_length = lines.iter().map(|line| line.len()).max().unwrap_or(0);
+
+    let mut transposed_lines = Vec::with_capacity(max_line_length);
+
+    for i in 0..max_line_length {
+        let transposed_line: String = (0..num_lines)
+            .map(|j| lines[j].chars().nth(i).unwrap_or(' '))
+            .collect();
+
+        transposed_lines.push(transposed_line);
+    }
+
+    transposed_lines.join("\n")
+}
+
 pub fn lcm(nums: Vec<u128>) -> u128 {
     nums.iter().product::<u128>() / multi_gcd(&nums, 0)
 }

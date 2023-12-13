@@ -1,4 +1,5 @@
 use crate::days_module::day::Day;
+use cached::proc_macro::cached;
 use rayon::prelude::*;
 
 fn can_put_down_group(template: &str, group_size: usize) -> bool {
@@ -11,8 +12,10 @@ fn can_put_down_group(template: &str, group_size: usize) -> bool {
 }
 
 // Recursive function.
-// TODO: Cache.
 // TODO: I could deduplicate code here, and make it more elegant.
+
+// TODO: Works best with two pointers, on a struct, I think.
+// #[cached]
 fn count_configurations(template: &str, remaining_groups: &[usize]) -> usize {
     let next_group_size = remaining_groups.iter().next();
     match template.chars().nth(0) {
