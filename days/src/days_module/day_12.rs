@@ -99,6 +99,15 @@ where
     result
 }
 
+fn multiply_string(input: &str, multiplier: usize) -> String {
+    let mut output = input.to_string();
+    for _ in 1..multiplier {
+        output += "?";
+        output += input;
+    }
+    output
+}
+
 pub struct Day12 {}
 
 impl Day for Day12 {
@@ -122,7 +131,7 @@ impl Day for Day12 {
         let inputs = input
             .split("\n")
             .map(parse_line)
-            .map(|(c, r)| (c.repeat(5), multiply_vector(r, 5)))
+            .map(|(c, r)| (multiply_string(c, 5), multiply_vector(r, 5)))
             .collect::<Vec<(String, Vec<usize>)>>();
         inputs
             .par_iter()
