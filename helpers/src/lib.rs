@@ -44,6 +44,15 @@ fn multi_gcd(nums: &Vec<u128>, idx: usize) -> u128 {
     return gcd(a, b);
 }
 
+pub fn replace_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
+    let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };
+    assert!(idx < s_bytes.len());
+    assert!(s_bytes[idx].is_ascii());
+    assert!(newchar.is_ascii());
+    // we've made sure this is safe.
+    s_bytes[idx] = newchar as u8;
+}
+
 pub fn transpose_string(input: &str) -> String {
     let lines: Vec<&str> = input.lines().collect();
 
