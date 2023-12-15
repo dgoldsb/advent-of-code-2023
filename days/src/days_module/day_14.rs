@@ -1,9 +1,18 @@
 use crate::days_module::day::Day;
 use helpers::replace_nth_char_ascii;
 
+fn score(image: &String) -> usize {
+    let mut lines = image.split("\n").collect::<Vec<&str>>();
+    lines.reverse();
+    lines
+        .iter()
+        .enumerate()
+        .map(|(i, l)| l.chars().filter(|c| *c == 'O').count() * (i + 1))
+        .sum::<usize>()
+}
+
 fn roll_rocks(image: &String, direction: char) -> String {
     let mut new_image = image.clone();
-    // TODO: Off by one?
     let line_length: isize = image.find('\n').unwrap().try_into().unwrap();
 
     let delta: isize = match direction {
@@ -37,10 +46,6 @@ fn roll_rocks(image: &String, direction: char) -> String {
     new_image
 }
 
-// TODO: Implement roll.
-// Sort, each move up and into new grid.
-// Use the transpose to make it line operations, then transpose back
-
 pub struct Day14 {}
 
 impl Day for Day14 {
@@ -49,19 +54,11 @@ impl Day for Day14 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let binding = roll_rocks(input, 'N');
-        println!("{}", binding);
-        let mut lines = binding.split("\n").collect::<Vec<&str>>();
-        lines.reverse();
-        lines
-            .iter()
-            .enumerate()
-            .map(|(i, l)| l.chars().filter(|c| *c == 'O').count() * (i + 1))
-            .sum::<usize>()
-            .to_string()
+        score(&roll_rocks(input, 'N')).to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
+        // TODO: Cycle detection.
         "".to_string()
     }
 }
