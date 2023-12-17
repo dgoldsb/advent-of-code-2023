@@ -5,7 +5,7 @@ use std::cmp::min;
 fn score_image(image: &str) -> Option<i32> {
     let lines = image.split("\n").collect::<Vec<&str>>();
 
-    for split in 1..(lines.len() - 1) {
+    for split in 1..(lines.len()) {
         let first_slice = &lines[..split];
         let second_slice = &lines[split..];
 
@@ -33,22 +33,20 @@ impl Day for Day13 {
         "day_13".to_string()
     }
 
-    // 34974 too high
-    // 20527 too low
     fn part_a(&self, input: &String) -> String {
-        let regular_sum = input
-            .split("\n\n")
-            .map(|image| score_image(image))
-            .filter(|option| option.is_some())
-            .map(|option| option.unwrap())
-            .sum::<i32>();
-        let transposed_sum = input
-            .split("\n\n")
-            .map(|image| score_image(&transpose_string(image)))
-            .filter(|option| option.is_some())
-            .map(|option| option.unwrap())
-            .sum::<i32>();
-        return (transposed_sum + 100 * regular_sum).to_string();
+        let mut regular = Vec::new();
+        let mut transposed = Vec::new();
+
+        for image in input.split("\n\n") {
+            match score_image(image) {
+                Some(score) => regular.push(score),
+                None => match score_image(&transpose_string(image)) {
+                    Some(score) => transposed.push(score),
+                    None => panic!("No score found!"),
+                }
+            }
+        }
+        return (transposed.iter().sum::<i32>() + 100 * regular.iter().sum::<i32>()).to_string();
     }
 
     fn part_b(&self, input: &String) -> String {
