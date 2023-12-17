@@ -1,3 +1,4 @@
+pub mod cycle;
 pub mod grid;
 use std::cmp::{max, min};
 use std::fs;

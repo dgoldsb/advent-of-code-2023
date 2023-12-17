@@ -1,5 +1,16 @@
 use crate::days_module::day::Day;
+use helpers::cycle::extrapolate::extrapolate_nth;
+use helpers::cycle::string_manipulator::StringManipulator;
 use helpers::replace_nth_char_ascii;
+
+fn iterate(image: &mut String) {
+    let mut new_image = roll_rocks(image, 'N');
+    new_image = roll_rocks(&new_image, 'W');
+    new_image = roll_rocks(&new_image, 'S');
+    new_image = roll_rocks(&new_image, 'E');
+    image.clear();
+    image.push_str(&new_image);
+}
 
 fn score(image: &String) -> usize {
     let mut lines = image.split("\n").collect::<Vec<&str>>();
@@ -20,7 +31,7 @@ fn roll_rocks(image: &String, direction: char) -> String {
         'S' => line_length + 1,
         'W' => -1,
         'E' => 1,
-        _ => panic!("Not possible")
+        _ => panic!("Not possible"),
     };
 
     // For each round rock.
@@ -31,13 +42,16 @@ fn roll_rocks(image: &String, direction: char) -> String {
         loop {
             pointer += delta;
             let pointer_usize_option = pointer.try_into();
-            if pointer_usize_option.is_err() { break }
+            if pointer_usize_option.is_err() {
+                break;
+            }
             let char_option = new_image.chars().nth(pointer_usize_option.unwrap());
             match char_option {
                 Some('#') => break,
+                Some('\n') => break,
                 Some('.') => last_empty_index = pointer,
                 None => break,
-                _ => {},
+                _ => {}
             }
         }
         replace_nth_char_ascii(&mut new_image, i, '.');
@@ -58,8 +72,9 @@ impl Day for Day14 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        // TODO: Cycle detection.
-        "".to_string()
+        let fun = Box::new(iterate);
+        let string_manipulator = StringManipulator::new(input, fun);
+        score(&extrapolate_nth(string_manipulator.into_iter(), 1000000000)).to_string()
     }
 }
 
