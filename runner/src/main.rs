@@ -13,6 +13,10 @@ use days::days_module::day_11::Day11;
 use days::days_module::day_12::Day12;
 use days::days_module::day_13::Day13;
 use days::days_module::day_14::Day14;
+use days::days_module::day_15::Day15;
+use days::days_module::day_16::Day16;
+use days::days_module::day_17::Day17;
+use days::days_module::day_18::Day18;
 use helpers::read_file;
 use std::time::Instant;
 
@@ -40,6 +44,10 @@ fn main() {
     days.push(Box::new(Day11 {}));
     days.push(Box::new(Day12 {}));
     days.push(Box::new(Day13 {}));
+    days.push(Box::new(Day15 {}));
+    days.push(Box::new(Day16 {}));
+    days.push(Box::new(Day17 {}));
+    days.push(Box::new(Day18 {}));
     days.push(Box::new(Day14 {}));
 
     let start = Instant::now();
