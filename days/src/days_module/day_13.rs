@@ -34,19 +34,18 @@ impl Day for Day13 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let mut regular = Vec::new();
-        let mut transposed = Vec::new();
-
+        let mut scores = Vec::new();
         for image in input.split("\n\n") {
-            match score_image(image) {
-                Some(score) => regular.push(score),
+            let score = match score_image(image) {
+                Some(score) => score * 100,
                 None => match score_image(&transpose_string(image)) {
-                    Some(score) => transposed.push(score),
+                    Some(score) => score,
                     None => panic!("No score found!"),
-                }
-            }
+                },
+            };
+            scores.push(score);
         }
-        return (transposed.iter().sum::<i32>() + 100 * regular.iter().sum::<i32>()).to_string();
+        return scores.iter().sum::<i32>().to_string();
     }
 
     fn part_b(&self, input: &String) -> String {

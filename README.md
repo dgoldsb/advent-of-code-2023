@@ -9,10 +9,12 @@ cd ../days
 cargo fmt
 cd ../helpers
 cargo fmt
+cd ..
 ```
 
 To run:
 ```bash
 cd runner
 cargo run --release
+cd ..
 ```
