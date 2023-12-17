@@ -26,7 +26,7 @@ where
     Err(values)
 }
 
-pub fn extrapolate_nth<T>(mut iter: impl Iterator<Item = T>, n: usize) -> T
+pub fn extrapolate_nth<T>(iter: impl Iterator<Item = T>, n: usize) -> T
 where
     T: Eq + std::hash::Hash + Clone,
 {

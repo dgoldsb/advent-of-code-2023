@@ -5,7 +5,6 @@ use std::cmp::min;
 fn score_image(image: &str) -> Option<i32> {
     let lines = image.split("\n").collect::<Vec<&str>>();
 
-    let len = lines.len();
     for split in 1..(lines.len() - 1) {
         let first_slice = &lines[..split];
         let second_slice = &lines[split..];

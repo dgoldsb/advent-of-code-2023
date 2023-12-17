@@ -1,6 +1,7 @@
 use crate::days_module::day::Day;
-use cached::proc_macro::cached;
 use rayon::prelude::*;
+use std::cell::RefCell;
+use std::collections::HashMap;
 
 fn can_put_down_group(template: &str, group_size: usize) -> bool {
     if template.len() < group_size {
@@ -12,71 +13,83 @@ fn can_put_down_group(template: &str, group_size: usize) -> bool {
 }
 
 // Recursive function.
-// TODO: I could deduplicate code here, and make it more elegant.
-
-// TODO: Works best with two pointers, on a struct, I think.
-// #[cached]
-fn count_configurations(template: &str, remaining_groups: &[usize]) -> usize {
-    let next_group_size = remaining_groups.iter().next();
-    match template.chars().nth(0) {
-        Some('#') => {
-            if next_group_size.is_none() {
-                0
-            } else {
-                if can_put_down_group(template, *next_group_size.unwrap()) {
-                    if template.len() > *next_group_size.unwrap() {
-                        count_configurations(
-                            &template[(next_group_size.unwrap() + 1)..],
-                            &remaining_groups[1..],
-                        )
-                    } else {
-                        if remaining_groups.len() == 1 {
-                            1
-                        } else {
-                            0
-                        }
-                    }
-                } else {
-                    0
-                }
-            }
-        }
-        Some('.') => count_configurations(&template[1..], remaining_groups),
-        Some('?') => {
-            let fill_sum = if next_group_size.is_none() {
-                0
-            } else {
-                if can_put_down_group(template, *next_group_size.unwrap()) {
-                    if template.len() > *next_group_size.unwrap() {
-                        count_configurations(
-                            &template[(next_group_size.unwrap() + 1)..],
-                            &remaining_groups[1..],
-                        )
-                    } else {
-                        if remaining_groups.len() == 1 {
-                            1
-                        } else {
-                            0
-                        }
-                    }
-                } else {
-                    0
-                }
-            };
-            let empty_sum = count_configurations(&template[1..], remaining_groups);
-
-            fill_sum + empty_sum
-        }
-        None => {
-            // Terminal condition.
-            if remaining_groups.is_empty() {
-                1
-            } else {
-                0
-            }
-        }
-        _ => panic!("Unknown character"),
+fn count_configurations<'a>(
+    template: &'a str,
+    remaining_groups: &'a [usize],
+    cache: &'a RefCell<HashMap<(&'a str, &'a [usize]), usize>>,
+) -> usize {
+    if cache.borrow().contains_key(&(template, remaining_groups)) {
+        return *cache.borrow().get(&(template, remaining_groups)).unwrap();
     }
+
+    let result = {
+        let next_group_size = remaining_groups.iter().next();
+        match template.chars().nth(0) {
+            Some('#') => {
+                if next_group_size.is_none() {
+                    0
+                } else {
+                    if can_put_down_group(template, *next_group_size.unwrap()) {
+                        if template.len() > *next_group_size.unwrap() {
+                            count_configurations(
+                                &template[(next_group_size.unwrap() + 1)..],
+                                &remaining_groups[1..],
+                                cache,
+                            )
+                        } else {
+                            if remaining_groups.len() == 1 {
+                                1
+                            } else {
+                                0
+                            }
+                        }
+                    } else {
+                        0
+                    }
+                }
+            }
+            Some('.') => count_configurations(&template[1..], remaining_groups, cache),
+            Some('?') => {
+                let fill_sum = if next_group_size.is_none() {
+                    0
+                } else {
+                    if can_put_down_group(template, *next_group_size.unwrap()) {
+                        if template.len() > *next_group_size.unwrap() {
+                            count_configurations(
+                                &template[(next_group_size.unwrap() + 1)..],
+                                &remaining_groups[1..],
+                                cache,
+                            )
+                        } else {
+                            if remaining_groups.len() == 1 {
+                                1
+                            } else {
+                                0
+                            }
+                        }
+                    } else {
+                        0
+                    }
+                };
+                let empty_sum = count_configurations(&template[1..], remaining_groups, cache);
+
+                fill_sum + empty_sum
+            }
+            None => {
+                // Terminal condition.
+                if remaining_groups.is_empty() {
+                    1
+                } else {
+                    0
+                }
+            }
+            _ => panic!("Unknown character"),
+        }
+    };
+    cache
+        .borrow_mut()
+        .insert((template, remaining_groups), result);
+    result
 }
 
 fn parse_line<'a>(line: &'a str) -> (&'a str, Vec<usize>) {
@@ -125,7 +138,7 @@ impl Day for Day12 {
             .collect::<Vec<(&str, Vec<usize>)>>();
         inputs
             .par_iter()
-            .map(|t| count_configurations(&t.0, &t.1))
+            .map(|t| count_configurations(&t.0, &t.1, &RefCell::new(HashMap::new())))
             .sum::<usize>()
             .to_string()
     }
@@ -138,7 +151,7 @@ impl Day for Day12 {
             .collect::<Vec<(String, Vec<usize>)>>();
         inputs
             .par_iter()
-            .map(|t| count_configurations(&t.0, &t.1))
+            .map(|t| count_configurations(&t.0, &t.1, &RefCell::new(HashMap::new())))
             .sum::<usize>()
             .to_string()
     }
