@@ -17,6 +17,13 @@ impl Grid {
     pub fn get_cell(&self, index: &GridIndex) -> Option<&Cell> {
         return self.cell_map.get(index);
     }
+
+    pub fn get_cell_by_index(&self, index: &(i32, i32)) -> Option<&Cell> {
+        return self.cell_map.get(&GridIndex {
+            x: index.0,
+            y: index.1,
+        });
+    }
 }
 
 impl FromStr for Grid {

@@ -28,7 +28,7 @@ fn solve(input: &String, start: GridIndex, start_delta: (i32, i32)) -> usize {
         if !beams.contains_key(&loc) {
             beams.insert(loc, HashSet::new());
         }
-        let mut set_reference = beams.get_mut(&loc).unwrap();
+        let set_reference = beams.get_mut(&loc).unwrap();
         if set_reference.contains(&dir) {
             // We evaluated this before, skip.
             continue;

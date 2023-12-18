@@ -45,9 +45,9 @@ fn main() {
     days.push(Box::new(Day12 {}));
     days.push(Box::new(Day13 {}));
     days.push(Box::new(Day15 {}));
-    days.push(Box::new(Day17 {}));
     days.push(Box::new(Day18 {}));
     // Slow days...
+    days.push(Box::new(Day17 {}));
     days.push(Box::new(Day14 {}));
     days.push(Box::new(Day16 {}));
 
