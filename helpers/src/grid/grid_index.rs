@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Copy, Clone, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GridIndex {
     pub x: i32,
     pub y: i32,

@@ -1,5 +1,6 @@
 use crate::grid::grid_index::GridIndex;
 
+#[derive(Clone)]
 pub struct Cell {
     pub index: GridIndex,
     pub value: char,

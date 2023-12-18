@@ -1,15 +1,21 @@
 use crate::grid::cell::Cell;
 use crate::grid::grid_index::GridIndex;
 use core::slice::Iter;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub struct Grid {
     cells: Vec<Cell>,
+    cell_map: HashMap<GridIndex, Cell>,
 }
 
 impl Grid {
     pub fn iter(&self) -> Iter<Cell> {
         self.cells.iter()
+    }
+
+    pub fn get_cell(&self, index: &GridIndex) -> Option<&Cell> {
+        return self.cell_map.get(index);
     }
 }
 
@@ -35,6 +41,8 @@ impl FromStr for Grid {
             row_index += 1;
         }
 
-        return Ok(Grid { cells });
+        let cell_map = cells.iter().map(|c| (c.index, c.clone())).collect();
+
+        return Ok(Grid { cells, cell_map });
     }
 }
