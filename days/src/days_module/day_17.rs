@@ -57,20 +57,13 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
         },
     ];
 
-    let first_enter_cost = enter_cost_grid
-        .get_cell_by_index(&start)
-        .unwrap()
-        .value
-        .to_digit(10)
-        .unwrap();
-
     g_score.insert(
         Node {
             coordinate: start,
             delta: (0, 1),
             streak: 0,
         },
-        first_enter_cost,
+        0,
     );
     g_score.insert(
         Node {
@@ -78,7 +71,7 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
             delta: (1, 0),
             streak: 0,
         },
-        first_enter_cost,
+        0,
     );
 
     for node in &queue {
