@@ -1,6 +1,5 @@
 use crate::days_module::day::Day;
 use helpers::grid::grid::Grid;
-use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -14,7 +13,27 @@ struct Node {
 }
 
 impl Node {
-    fn get_neighbors(&self) -> Vec<Node> {
+    fn get_neighbors(&self, ultra_crucible: bool) -> Vec<Node> {
+        let min_streak = match ultra_crucible {
+            true => 3,
+            false => 0,
+        };
+        let max_streak = match ultra_crucible {
+            true => 10,
+            false => 3,
+        };
+
+        if self.streak < min_streak {
+            return vec![Node {
+                coordinate: (
+                    self.coordinate.0 + self.delta.0,
+                    self.coordinate.1 + self.delta.1,
+                ),
+                delta: self.delta,
+                streak: self.streak + 1,
+            }];
+        }
+
         let mut neighbors = Vec::new();
         for delta in vec![(1, 0), (0, 1), (-1, 0), (0, -1)] {
             if delta.0 == -1 * self.delta.0 && delta.1 == -1 * self.delta.1 {
@@ -26,7 +45,7 @@ impl Node {
             } else {
                 0
             };
-            if new_streak >= 3 {
+            if new_streak >= max_streak {
                 continue;
             }
 
@@ -41,7 +60,12 @@ impl Node {
 }
 
 // Returns the cost to reach the end.
-fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
+fn find_path(
+    start: (i32, i32),
+    end: (i32, i32),
+    enter_cost_grid: &Grid,
+    ultra_crucible: bool,
+) -> u32 {
     let mut g_score: HashMap<Node, u32> = HashMap::new();
     let mut came_from: HashMap<Node, Node> = HashMap::new();
     let mut open_set: HashSet<Node> = HashSet::new();
@@ -95,7 +119,7 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
             continue;
         }
 
-        for neighbor in current_node.get_neighbors() {
+        for neighbor in current_node.get_neighbors(ultra_crucible) {
             // Calculate the enter cost.
             let enter_cost_option = enter_cost_grid.get_cell_by_index(&neighbor.coordinate);
             if enter_cost_option.is_none() {
@@ -146,11 +170,15 @@ impl Day for Day17 {
         let size: i32 = (input.split("\n").next().unwrap().len() - 1)
             .try_into()
             .unwrap();
-        a_star((0, 0), (size, size), &grid).to_string()
+        find_path((0, 0), (size, size), &grid, false).to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let grid = Grid::from_str(input).unwrap();
+        let size: i32 = (input.split("\n").next().unwrap().len() - 1)
+            .try_into()
+            .unwrap();
+        find_path((0, 0), (size, size), &grid, true).to_string()
     }
 }
 
