@@ -1,10 +1,12 @@
 use crate::days_module::day::Day;
 use helpers::grid::grid::Grid;
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 // We are doing a weird A*, our base node consists of coordinates, and some context how we got here.
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Hash)]
 struct Node {
     coordinate: (i32, i32),
     delta: (i32, i32),
@@ -43,19 +45,24 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
     let mut g_score: HashMap<Node, u32> = HashMap::new();
     let mut came_from: HashMap<Node, Node> = HashMap::new();
     let mut open_set: HashSet<Node> = HashSet::new();
+    let mut min_heap: BinaryHeap<(u32, Node)> = BinaryHeap::new();
 
-    let mut queue = vec![
+    min_heap.push((
+        u32::MAX,
         Node {
             coordinate: start,
             delta: (0, 1),
             streak: 0,
         },
+    ));
+    min_heap.push((
+        u32::MAX,
         Node {
             coordinate: start,
             delta: (1, 0),
             streak: 0,
         },
-    ];
+    ));
 
     g_score.insert(
         Node {
@@ -74,13 +81,13 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
         0,
     );
 
-    for node in &queue {
+    for (_, node) in &min_heap {
         open_set.insert(*node);
     }
 
-    while !queue.is_empty() {
+    while !min_heap.is_empty() {
         // Pop a node.
-        let current_node = queue.pop().unwrap();
+        let (_, current_node) = min_heap.pop().unwrap();
         open_set.remove(&current_node);
 
         // If we are at the exit it may be the lowest, or not. We do know we can stop this branch.
@@ -113,7 +120,7 @@ fn a_star(start: (i32, i32), end: (i32, i32), enter_cost_grid: &Grid) -> u32 {
 
             if !open_set.contains(&neighbor) {
                 open_set.insert(neighbor);
-                queue.push(neighbor);
+                min_heap.push((u32::MAX - tentative_g_score, neighbor));
             }
         }
     }
