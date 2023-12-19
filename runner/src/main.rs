@@ -17,6 +17,7 @@ use days::days_module::day_15::Day15;
 use days::days_module::day_16::Day16;
 use days::days_module::day_17::Day17;
 use days::days_module::day_18::Day18;
+use days::days_module::day_19::Day19;
 use helpers::read_file;
 use std::time::Instant;
 
@@ -46,6 +47,7 @@ fn main() {
     days.push(Box::new(Day13 {}));
     days.push(Box::new(Day15 {}));
     days.push(Box::new(Day18 {}));
+    days.push(Box::new(Day19 {}));
     // Slow days...
     days.push(Box::new(Day14 {}));
     days.push(Box::new(Day16 {}));
