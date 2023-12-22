@@ -1,5 +1,9 @@
 use crate::days_module::day::Day;
 use std::collections::HashMap;
+use std::str::FromStr;
+use helpers::grid::cell::Cell;
+use helpers::grid::grid::Grid;
+use helpers::grid::grid_index::GridIndex;
 
 struct MachinePart {
     x: usize,
@@ -9,6 +13,10 @@ struct MachinePart {
 }
 
 impl MachinePart {
+    fn sum(&self) -> usize {
+        self.x + self.m + self.a + self.s
+    }
+
     fn access(&self, char_: &char) -> usize {
         match char_ {
             'x' => self.x,
@@ -20,8 +28,30 @@ impl MachinePart {
     }
 }
 
+impl FromStr for MachinePart {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<MachinePart, Self::Err> {
+        let cleaned_raw_part = input
+            .replace("{", "")
+            .replace("}", "")
+            .replace("x", "")
+            .replace("m", "")
+            .replace("s", "")
+            .replace("s", "");
+        let mut xmas_split = cleaned_raw_part.split(",");
+        return Ok(MachinePart {
+            x: xmas_split.next().unwrap().parse().unwrap(),
+            m: xmas_split.next().unwrap().parse().unwrap(),
+            a: xmas_split.next().unwrap().parse().unwrap(),
+            s: xmas_split.next().unwrap().parse().unwrap(),
+        });
+    }
+}
+
 #[derive(Clone, Eq, Hash, PartialEq)]
 struct Rule {
+    property: char,
     sign: char,
     value: usize,
 }
@@ -33,6 +63,28 @@ impl Rule {
             '>' => value < &self.value,
             _ => panic!("Invalid operator {}", self.sign),
         }
+    }
+}
+
+impl FromStr for Rule {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Rule, Self::Err> {
+        let sign: char;
+        if input.contains("<") {
+            sign = '<';
+        } else if input.contains(">") {
+            sign = '>';
+        } else {
+            return Err(());
+        }
+
+        let mut split = input.split(sign);
+        let property = split.next().unwrap().chars().next().unwrap();
+        let value: usize = split.next().unwrap().parse().unwrap();
+        return Ok(
+            Rule { property, sign, value }
+        )
     }
 }
 
@@ -48,7 +100,7 @@ impl<'a> WorkflowRule<'a> {
         self.rule_result_map.insert(rule, result);
     }
 
-    fn test_part(&self, part: MachinePart) -> bool {
+    fn test_part(&self, part : &MachinePart) -> bool {
         for (property, rule) in &self.rules {
             if rule.test(&part.access(&property)) {
                 return match self.rule_result_map.get(&rule).unwrap() {
@@ -72,7 +124,32 @@ impl Day for Day19 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        "".to_string()
+        let mut input_split = input.split("\n\n");
+        let raw_rule = input_split.next().unwrap();
+        let raw_parts = input_split.next().unwrap();
+
+        // Parse the raw workflow rules into `WorkflowRule` objects.
+        let mut cache: HashMap<String, WorkflowRule> = HashMap::new();
+        let mut raw_workflow_rule_queue = raw_rule.split("\n").map(|s| s.to_string()).collect::<Vec<String>>();
+        while !raw_workflow_rule_queue.is_empty() {
+            let raw_workflow_rule = raw_workflow_rule_queue.pop().unwrap();
+
+            // Parse name out.
+            let mut name_split = raw_workflow_rule.split("{");
+            let name = name_split.next().unwrap().to_string();
+            let rest = name_split.next().unwrap();
+
+            // Parse rules.
+
+            // Parse default.
+
+            println!("{}", raw_workflow_rule);
+            let foo = "";
+        }
+        let in_workflow: &WorkflowRule = cache.get("in").unwrap();
+
+        // Parse the raw machine parts into `MachinePart` objects and compute result.
+        raw_parts.split("\n").map(|s| MachinePart::from_str(s).unwrap()).filter(|p| in_workflow.test_part(p)).map(|p| p.sum()).sum::<usize>().to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
