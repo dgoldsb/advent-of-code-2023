@@ -14,6 +14,15 @@ impl Grid {
         self.cells.iter()
     }
 
+    pub fn find_index(&self, value: &char) -> Result<&GridIndex, ()> {
+        for cell in &self.cells {
+            if cell.value == *value {
+                return Ok(&cell.index)
+            }
+        }
+        return Err(())
+    }
+
     pub fn get_cell(&self, index: &GridIndex) -> Option<&Cell> {
         return self.cell_map.get(index);
     }
