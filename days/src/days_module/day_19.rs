@@ -1,9 +1,6 @@
 use crate::days_module::day::Day;
 use std::collections::HashMap;
 use std::str::FromStr;
-use helpers::grid::cell::Cell;
-use helpers::grid::grid::Grid;
-use helpers::grid::grid_index::GridIndex;
 
 struct MachinePart {
     x: usize,
@@ -82,9 +79,11 @@ impl FromStr for Rule {
         let mut split = input.split(sign);
         let property = split.next().unwrap().chars().next().unwrap();
         let value: usize = split.next().unwrap().parse().unwrap();
-        return Ok(
-            Rule { property, sign, value }
-        )
+        return Ok(Rule {
+            property,
+            sign,
+            value,
+        });
     }
 }
 
@@ -100,7 +99,7 @@ impl<'a> WorkflowRule<'a> {
         self.rule_result_map.insert(rule, result);
     }
 
-    fn test_part(&self, part : &MachinePart) -> bool {
+    fn test_part(&self, part: &MachinePart) -> bool {
         for (property, rule) in &self.rules {
             if rule.test(&part.access(&property)) {
                 return match self.rule_result_map.get(&rule).unwrap() {
@@ -130,7 +129,10 @@ impl Day for Day19 {
 
         // Parse the raw workflow rules into `WorkflowRule` objects.
         let mut cache: HashMap<String, WorkflowRule> = HashMap::new();
-        let mut raw_workflow_rule_queue = raw_rule.split("\n").map(|s| s.to_string()).collect::<Vec<String>>();
+        let mut raw_workflow_rule_queue = raw_rule
+            .split("\n")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         while !raw_workflow_rule_queue.is_empty() {
             let raw_workflow_rule = raw_workflow_rule_queue.pop().unwrap();
 
@@ -149,7 +151,13 @@ impl Day for Day19 {
         let in_workflow: &WorkflowRule = cache.get("in").unwrap();
 
         // Parse the raw machine parts into `MachinePart` objects and compute result.
-        raw_parts.split("\n").map(|s| MachinePart::from_str(s).unwrap()).filter(|p| in_workflow.test_part(p)).map(|p| p.sum()).sum::<usize>().to_string()
+        raw_parts
+            .split("\n")
+            .map(|s| MachinePart::from_str(s).unwrap())
+            .filter(|p| in_workflow.test_part(p))
+            .map(|p| p.sum())
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
