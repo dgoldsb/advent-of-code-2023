@@ -4,7 +4,7 @@ use std::collections::BinaryHeap;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-// We are doing a weird A*, our base node consists of coordinates, and some context how we got here.
+// We are doing a weird Dijkstra, our base node consists of coordinates, and some context how we got here.
 #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Hash)]
 struct Node {
     coordinate: (i32, i32),
