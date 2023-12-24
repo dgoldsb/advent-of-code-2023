@@ -17,10 +17,10 @@ impl Grid {
     pub fn find_index(&self, value: &char) -> Result<&GridIndex, ()> {
         for cell in &self.cells {
             if cell.value == *value {
-                return Ok(&cell.index)
+                return Ok(&cell.index);
             }
         }
-        return Err(())
+        return Err(());
     }
 
     pub fn get_cell(&self, index: &GridIndex) -> Option<&Cell> {

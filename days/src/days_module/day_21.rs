@@ -47,27 +47,27 @@ impl Day for Day21 {
 
                 // Skip is it is not in the grid.
                 if cell_option.is_none() {
-                    continue
+                    continue;
                 }
 
                 // Skip if this is a `#`.
                 if grid.get_cell(&neighbour).unwrap().value == '#' {
-                    continue
+                    continue;
                 }
 
                 // Skip if visited.
                 if visited.contains(&neighbour) {
-                    continue
+                    continue;
                 }
 
                 // Skip if over steps limit.
                 if steps == limit {
-                    continue
+                    continue;
                 }
 
                 // Skip if it is in the heap.
                 if in_heap.contains(&neighbour) {
-                    continue
+                    continue;
                 }
 
                 heap.push((i32::MAX - (steps + 1), neighbour));

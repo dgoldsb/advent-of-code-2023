@@ -28,11 +28,11 @@ fn disintegrate(cube: &Cube, all_cubes: &Vec<Cube>) -> usize {
             escape = false;
         }
         if escape {
-            break
+            break;
         }
     }
 
-    return all_cubes.len() - cube_set.len() - 1
+    return all_cubes.len() - cube_set.len() - 1;
 }
 
 fn supported_by<'a>(cube: &'a Cube, all_cubes: &'a Vec<Cube>) -> Vec<&'a Cube> {
