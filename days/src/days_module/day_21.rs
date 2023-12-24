@@ -78,6 +78,12 @@ impl Day for Day21 {
         end_plots.len().to_string()
     }
 
+    // I need to normalize to read the value.
+    // In map we need to actually put the real unnormalized.
+    // This is clearly too much to actually traverse... Or is it?
+    // Maybe it is possible already with our visited map? No, our visited will be gigabytes.
+    // Maybe it follows a curve?
+    // Or maybe we need smart memoization...
     fn part_b(&self, input: &String) -> String {
         "".to_string()
     }
