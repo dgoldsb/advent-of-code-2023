@@ -18,10 +18,12 @@ use days::days_module::day_16::Day16;
 use days::days_module::day_17::Day17;
 use days::days_module::day_18::Day18;
 use days::days_module::day_19::Day19;
+use days::days_module::day_20::Day20;
 use days::days_module::day_21::Day21;
 use days::days_module::day_22::Day22;
 use days::days_module::day_23::Day23;
 use days::days_module::day_24::Day24;
+use days::days_module::day_25::Day25;
 use helpers::read_file;
 use std::time::Instant;
 
@@ -43,7 +45,6 @@ fn main() {
     days.push(Box::new(Day05 {}));
     days.push(Box::new(Day06 {}));
     days.push(Box::new(Day07 {}));
-    days.push(Box::new(Day08 {}));
     days.push(Box::new(Day09 {}));
     days.push(Box::new(Day10 {}));
     days.push(Box::new(Day11 {}));
@@ -52,14 +53,17 @@ fn main() {
     days.push(Box::new(Day15 {}));
     days.push(Box::new(Day18 {}));
     days.push(Box::new(Day19 {}));
+    days.push(Box::new(Day20 {}));
     days.push(Box::new(Day21 {}));
     days.push(Box::new(Day24 {}));
+    days.push(Box::new(Day25 {}));
     // Slow days...
     days.push(Box::new(Day14 {}));
     days.push(Box::new(Day16 {}));
     days.push(Box::new(Day17 {}));
     days.push(Box::new(Day22 {}));
     // Unfinished days...
+    days.push(Box::new(Day08 {}));
     days.push(Box::new(Day23 {}));
 
     let start = Instant::now();
