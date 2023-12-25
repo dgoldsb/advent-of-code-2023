@@ -2,7 +2,6 @@ use crate::days_module::day::Day;
 use helpers::grid::grid::Grid;
 use helpers::grid::grid_index::GridIndex;
 use std::cmp::max;
-use std::collections::HashSet;
 use std::str::FromStr;
 
 // Again a custom state space: we cannot revisit places, which is an important pitvall because we

@@ -23,9 +23,9 @@ impl HailStone {
             return None;
         }
 
-        let t1 = ((other.start.0 - self.start.0) as f64 * dy2 - (other.start.1 - self.start.1) as f64 * dx2)
+        let t1 = ((other.start.0 - self.start.0) as f64 * dy2
+            - (other.start.1 - self.start.1) as f64 * dx2)
             / determinant;
-
 
         if t1 < 1.0 {
             return None;
@@ -78,7 +78,10 @@ impl Day for Day24 {
 
     // TODO: 32027 too high. 27773 too high, 27995 too high...
     fn part_a(&self, input: &String) -> String {
-        let stones = input.split("\n").map(|l| HailStone::from_string(l).unwrap()).collect::<Vec<HailStone>>();
+        let stones = input
+            .split("\n")
+            .map(|l| HailStone::from_string(l).unwrap())
+            .collect::<Vec<HailStone>>();
 
         let mut intersections = Vec::new();
 
@@ -87,7 +90,7 @@ impl Day for Day24 {
                 let intersection_option = stone.intersection(other);
                 match intersection_option {
                     Some(c) => intersections.push(c),
-                    None => {},
+                    None => {}
                 }
             }
         }
@@ -105,10 +108,10 @@ impl Day for Day24 {
 
         let valid_intersections = intersections
             .iter()
-            .filter(|c| c.0 <= upper )
-            .filter(|c| c.1 <= upper )
-            .filter(|c| c.0 >= lower )
-            .filter(|c| c.1 >= lower )
+            .filter(|c| c.0 <= upper)
+            .filter(|c| c.1 <= upper)
+            .filter(|c| c.0 >= lower)
+            .filter(|c| c.1 >= lower)
             .collect::<Vec<&(f64, f64)>>();
         let valid_intersection_count = valid_intersections.len();
         valid_intersection_count.to_string()

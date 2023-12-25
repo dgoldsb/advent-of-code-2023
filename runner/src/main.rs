@@ -53,7 +53,6 @@ fn main() {
     days.push(Box::new(Day15 {}));
     days.push(Box::new(Day18 {}));
     days.push(Box::new(Day19 {}));
-    days.push(Box::new(Day20 {}));
     days.push(Box::new(Day21 {}));
     days.push(Box::new(Day24 {}));
     days.push(Box::new(Day25 {}));
@@ -64,6 +63,7 @@ fn main() {
     days.push(Box::new(Day22 {}));
     // Unfinished days...
     days.push(Box::new(Day08 {}));
+    days.push(Box::new(Day20 {}));
     days.push(Box::new(Day23 {}));
 
     let start = Instant::now();

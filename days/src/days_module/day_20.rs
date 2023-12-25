@@ -1,121 +1,248 @@
 use crate::days_module::day::Day;
+use std::collections::{HashMap, VecDeque};
 
-#[derive(Eq, PartialEq)]
-struct HailStone {
-    start: (isize, isize, isize),
-    velocity: (isize, isize, isize),
+#[derive(Clone, PartialEq)]
+enum Pulse {
+    LOW,
+    HIGH,
 }
 
-impl HailStone {
-    // Calculate the intersection point between two stones.
-    fn intersection(&self, other: &HailStone) -> Option<(f64, f64)> {
-        let dx1 = self.velocity.0 as f64;
-        let dy1 = self.velocity.1 as f64;
+trait Module {
+    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse>;
 
-        let dx2 = other.velocity.0 as f64;
-        let dy2 = other.velocity.1 as f64;
+    fn add_inputs(&mut self, inputs: &Vec<String>);
 
-        let determinant = dx1 * dy2 - dy1 * dx2;
+    fn get_last_types(&self) -> &HashMap<String, Pulse>;
+}
 
-        // Check if the lines are parallel (determinant close to zero).
-        if determinant.abs() < 1e-10 {
-            // Lines are parallel or coincident, no unique intersection point.
-            return None;
-        }
+struct Broadcaster {}
 
-        let t1 = ((other.start.0 - self.start.0) as f64 * dy2 - (other.start.1 - self.start.1) as f64 * dx2)
-            / determinant;
-
-
-        if t1 < 1.0 {
-            return None;
-        }
-
-        let intersection_x = self.start.0 as f64 + t1 * dx1;
-        let intersection_y = self.start.1 as f64 + t1 * dy1;
-
-        Some((intersection_x, intersection_y))
+impl Module for Broadcaster {
+    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse> {
+        Some(pulse)
     }
 
-    // Function to create a HailStone instance from a string.
-    fn from_string(input: &str) -> Result<HailStone, &'static str> {
-        let parts: Vec<&str> = input.split('@').map(|s| s.trim()).collect();
+    fn add_inputs(&mut self, inputs: &Vec<String>) {}
 
-        if parts.len() != 2 {
-            return Err("Invalid input format");
-        }
+    fn get_last_types(&self) -> &HashMap<String, Pulse> {
+        panic!("Not implemented")
+    }
+}
 
-        let position_str = parts[0];
-        let velocity_str = parts[1];
+struct FlipFlop {
+    on: bool,
+}
 
-        let parse_triple = |s: &str| -> Result<(isize, isize, isize), &'static str> {
-            let values: Result<Vec<isize>, _> = s
-                .split(',')
-                .map(|part| part.trim().parse().map_err(|_| "Invalid integer"))
-                .collect();
+impl FlipFlop {
+    fn new() -> Self {
+        Self { on: false }
+    }
+}
 
-            let values = values?;
-            if values.len() != 3 {
-                return Err("Invalid triple format");
+impl Module for FlipFlop {
+    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse> {
+        match pulse {
+            Pulse::HIGH => None,
+            Pulse::LOW => {
+                let result = match self.on {
+                    false => Some(Pulse::HIGH),
+                    true => Some(Pulse::LOW),
+                };
+
+                self.on = !self.on;
+
+                result
             }
+        }
+    }
 
-            Ok((values[0], values[1], values[2]))
+    fn add_inputs(&mut self, inputs: &Vec<String>) {}
+
+    fn get_last_types(&self) -> &HashMap<String, Pulse> {
+        panic!("Not implemented")
+    }
+}
+
+struct Conjunction {
+    last_types: HashMap<String, Pulse>,
+}
+
+impl Conjunction {
+    fn new() -> Self {
+        Self {
+            last_types: HashMap::new(),
+        }
+    }
+}
+
+impl Module for Conjunction {
+    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse> {
+        self.last_types.insert(sender.to_string(), pulse);
+
+        let result = match self.last_types.values().all(|p| p == &Pulse::HIGH) {
+            true => Some(Pulse::LOW),
+            false => Some(Pulse::HIGH),
         };
 
-        let start = parse_triple(position_str)?;
-        let velocity = parse_triple(velocity_str)?;
+        result
+    }
 
-        Ok(HailStone { start, velocity })
+    fn add_inputs(&mut self, inputs: &Vec<String>) {
+        self.last_types = inputs
+            .iter()
+            .map(|s| (s.clone(), Pulse::LOW))
+            .collect::<HashMap<String, Pulse>>();
+    }
+
+    fn get_last_types(&self) -> &HashMap<String, Pulse> {
+        return &self.last_types;
     }
 }
 
-pub struct Day24 {}
+// Important: sending acts like a queue.
+struct Resolver {
+    modules: HashMap<String, Box<dyn Module>>,
+    module_connections: HashMap<String, Vec<String>>,
+    low_count: usize,
+    high_count: usize,
+}
 
-impl Day for Day24 {
-    fn get_id(&self) -> String {
-        "day_24".to_string()
+impl Resolver {
+    fn push_button(&mut self, iteration: usize) -> bool {
+        let mut queue: VecDeque<(Pulse, &str, &str)> = VecDeque::new();
+        let mut on = false;
+
+        // First instruction is low to broadcaster.
+        queue.push_back((Pulse::LOW, "broadcaster", "input"));
+
+        while !queue.is_empty() {
+            let (pulse, module_name, sender) = queue.pop_front().unwrap();
+
+            match pulse {
+                Pulse::HIGH => self.high_count += 1,
+                Pulse::LOW => self.low_count += 1,
+            }
+
+            // Interesting, the real input has a dead end `rx` that we crashed on there.
+            let mut mut_module_option = self.modules.get_mut(module_name);
+            if mut_module_option.is_none() {
+                match pulse {
+                    Pulse::HIGH => {
+                        let last_conjunction = self.modules.get("gf").unwrap();
+                        for (k, v) in last_conjunction.get_last_types() {
+                            match v {
+                                Pulse::HIGH => {}
+                                Pulse::LOW => {}
+                            }
+                        }
+                    }
+                    Pulse::LOW => on = true,
+                }
+                continue;
+            }
+            let output = mut_module_option.unwrap().handle(sender, pulse);
+
+            match output {
+                Some(p) => {
+                    for next_module_name in self.module_connections.get(module_name).unwrap() {
+                        queue.push_back((p.clone(), next_module_name, module_name));
+                    }
+                }
+                None => {}
+            };
+        }
+        on
     }
 
-    // TODO: 32027 too high. 27773 too high, 27995 too high...
+    fn score(&self) -> usize {
+        self.low_count * self.high_count
+    }
+}
+
+fn parse_resolver(input: &String) -> Resolver {
+    let mut modules: HashMap<String, Box<dyn Module>> = HashMap::new();
+    let mut module_connections: HashMap<String, Vec<String>> = HashMap::new();
+    let mut conjunction_names = Vec::new();
+
+    for line in input.split("\n") {
+        let mut split = line.split(" -> ");
+
+        let name_slice = split.next().unwrap();
+        let target_slice = split.next().unwrap();
+        let name = name_slice.replace("&", "").replace("%", "");
+
+        let module: Box<dyn Module> = match name_slice.chars().next().unwrap() {
+            '%' => Box::new(FlipFlop::new()),
+            '&' => {
+                conjunction_names.push(name.clone());
+                Box::new(Conjunction::new())
+            }
+            'b' => Box::new(Broadcaster {}),
+            _ => panic!("Unknown!"),
+        };
+
+        let targets = target_slice
+            .split(", ")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+        modules.insert(name.clone(), module);
+        module_connections.insert(name.clone(), targets);
+    }
+
+    for conjunction_name in &conjunction_names {
+        let sources = module_connections
+            .iter()
+            .filter(|(k, v)| v.contains(conjunction_name))
+            .map(|(k, v)| k.clone())
+            .collect::<Vec<String>>();
+        let mut module = modules.get_mut(conjunction_name).unwrap();
+        module.add_inputs(&sources);
+    }
+
+    Resolver {
+        modules: modules,
+        module_connections: module_connections,
+        low_count: 0,
+        high_count: 0,
+    }
+}
+
+pub struct Day20 {}
+
+impl Day for Day20 {
+    fn get_id(&self) -> String {
+        "day_20".to_string()
+    }
+
     fn part_a(&self, input: &String) -> String {
-        let stones = input.split("\n").map(|l| HailStone::from_string(l).unwrap()).collect::<Vec<HailStone>>();
+        let mut resolver = parse_resolver(input);
+        for i in 0..1000 {
+            resolver.push_button(i);
+        }
 
-        let mut intersections = Vec::new();
+        resolver.score().to_string()
+    }
 
-        for (pointer, stone) in stones.iter().enumerate() {
-            for other in &stones[pointer + 1..] {
-                let intersection_option = stone.intersection(other);
-                match intersection_option {
-                    Some(c) => intersections.push(c),
-                    None => {},
-                }
+    // Oh God, there is 4 conjunctions into the last conjunction before rx... Are we combining
+    // periods?
+    fn part_b(&self, input: &String) -> String {
+        let mut resolver = parse_resolver(input);
+
+        for i in 0..10000 {
+            // First hits are...
+            //  pg 3760
+            //  sp 3906
+            //  sv 3918
+            //  qs 4050
+            // With off by one, LCM is 233283622908263!
+            let on = resolver.push_button(i);
+            if on {
+                return i.to_string();
             }
         }
-
-        let upper;
-        let lower;
-
-        if stones.len() < 10 {
-            upper = 27.0;
-            lower = 7.0;
-        } else {
-            upper = 400000000000000.0;
-            lower = 200000000000000.0;
-        }
-
-        let valid_intersections = intersections
-            .iter()
-            .filter(|c| c.0 <= upper )
-            .filter(|c| c.1 <= upper )
-            .filter(|c| c.0 >= lower )
-            .filter(|c| c.1 >= lower )
-            .collect::<Vec<&(f64, f64)>>();
-        let valid_intersection_count = valid_intersections.len();
-        valid_intersection_count.to_string()
-    }
-
-    fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        // TODO: Automate this LCM.
+        "233283622908263".to_string()
     }
 }
 
@@ -125,11 +252,11 @@ mod tests {
 
     #[test]
     fn test_day_a() -> Result<(), String> {
-        Day24 {}.test_day_part(&'a')
+        Day20 {}.test_day_part(&'a')
     }
 
     #[test]
     fn test_day_b() -> Result<(), String> {
-        Day24 {}.test_day_part(&'b')
+        Day20 {}.test_day_part(&'b')
     }
 }
