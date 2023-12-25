@@ -101,6 +101,7 @@ impl Day for Day23 {
         find_longest_path(start, end, &grid, false).to_string()
     }
 
+    // TODO: Rewrite to consider only junctions, we can fastforward. Try DFS.
     fn part_b(&self, input: &String) -> String {
         let grid = Grid::from_str(input).unwrap();
         // TODO: Find the start and end programmatically instead of manual replacement.

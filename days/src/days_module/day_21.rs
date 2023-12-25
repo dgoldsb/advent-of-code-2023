@@ -84,6 +84,8 @@ impl Day for Day21 {
     // Maybe it is possible already with our visited map? No, our visited will be gigabytes.
     // Maybe it follows a curve?
     // Or maybe we need smart memoization...
+
+    // TODO: To start, implement and follow the example.
     fn part_b(&self, input: &String) -> String {
         "".to_string()
     }
