@@ -183,7 +183,6 @@ impl FromStr for Rule {
 }
 
 struct WorkflowRule {
-    name: String,
     rules: Vec<(char, Rule)>,
     rule_result_map: HashMap<Rule, Result<bool, String>>,
     default: Result<bool, String>,
@@ -316,7 +315,6 @@ fn parse(input: &String) -> (HashMap<String, WorkflowRule>, Vec<MachinePart>) {
         let rules = Vec::new();
         let rule_result_map = HashMap::new();
         workflow_rule = WorkflowRule {
-            name: name.clone(),
             rules,
             rule_result_map,
             default,

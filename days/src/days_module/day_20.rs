@@ -18,11 +18,11 @@ trait Module {
 struct Broadcaster {}
 
 impl Module for Broadcaster {
-    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse> {
+    fn handle(&mut self, _: &str, pulse: Pulse) -> Option<Pulse> {
         Some(pulse)
     }
 
-    fn add_inputs(&mut self, inputs: &Vec<String>) {}
+    fn add_inputs(&mut self, _: &Vec<String>) {}
 
     fn get_last_types(&self) -> &HashMap<String, Pulse> {
         panic!("Not implemented")
@@ -40,7 +40,7 @@ impl FlipFlop {
 }
 
 impl Module for FlipFlop {
-    fn handle(&mut self, sender: &str, pulse: Pulse) -> Option<Pulse> {
+    fn handle(&mut self, _: &str, pulse: Pulse) -> Option<Pulse> {
         match pulse {
             Pulse::HIGH => None,
             Pulse::LOW => {
@@ -56,7 +56,7 @@ impl Module for FlipFlop {
         }
     }
 
-    fn add_inputs(&mut self, inputs: &Vec<String>) {}
+    fn add_inputs(&mut self, _: &Vec<String>) {}
 
     fn get_last_types(&self) -> &HashMap<String, Pulse> {
         panic!("Not implemented")
@@ -108,7 +108,7 @@ struct Resolver {
 }
 
 impl Resolver {
-    fn push_button(&mut self, iteration: usize) -> bool {
+    fn push_button(&mut self, _: usize) -> bool {
         let mut queue: VecDeque<(Pulse, &str, &str)> = VecDeque::new();
         let mut on = false;
 
@@ -124,12 +124,12 @@ impl Resolver {
             }
 
             // Interesting, the real input has a dead end `rx` that we crashed on there.
-            let mut mut_module_option = self.modules.get_mut(module_name);
+            let mut_module_option = self.modules.get_mut(module_name);
             if mut_module_option.is_none() {
                 match pulse {
                     Pulse::HIGH => {
                         let last_conjunction = self.modules.get("gf").unwrap();
-                        for (k, v) in last_conjunction.get_last_types() {
+                        for (_, v) in last_conjunction.get_last_types() {
                             match v {
                                 Pulse::HIGH => {}
                                 Pulse::LOW => {}
@@ -193,10 +193,10 @@ fn parse_resolver(input: &String) -> Resolver {
     for conjunction_name in &conjunction_names {
         let sources = module_connections
             .iter()
-            .filter(|(k, v)| v.contains(conjunction_name))
-            .map(|(k, v)| k.clone())
+            .filter(|(_, v)| v.contains(conjunction_name))
+            .map(|(k, _)| k.clone())
             .collect::<Vec<String>>();
-        let mut module = modules.get_mut(conjunction_name).unwrap();
+        let module = modules.get_mut(conjunction_name).unwrap();
         module.add_inputs(&sources);
     }
 
