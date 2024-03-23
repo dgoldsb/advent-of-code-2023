@@ -5,20 +5,18 @@ pub struct Day01 {}
 fn solve(input: &String) -> String {
     let mut first_number_cache: Option<char> = Option::None;
     let mut last_number_cache: Option<char> = Option::None;
-    let mut ints: Vec<i32> = Vec::new();
+    let mut sum: i32 = 0;
 
     for input_char in input.chars() {
         match input_char {
             '\n' => {
-                ints.push(
-                    format!(
-                        "{}{}",
-                        first_number_cache.unwrap_or_default(),
-                        last_number_cache.unwrap_or_default(),
-                    )
-                    .parse()
-                    .expect("Should be an integer"),
-                );
+                sum += format!(
+                    "{}{}",
+                    first_number_cache.unwrap_or_default(),
+                    last_number_cache.unwrap_or_default(),
+                )
+                .parse::<i32>()
+                .expect("Should be an integer");
                 first_number_cache = Option::None;
             }
             '0'..='9' => {
@@ -33,18 +31,16 @@ fn solve(input: &String) -> String {
 
     // Handle the last line, that may not have a newline.
     if first_number_cache.is_some() {
-        ints.push(
-            format!(
-                "{}{}",
-                first_number_cache.unwrap_or_default(),
-                last_number_cache.unwrap_or_default(),
-            )
-            .parse()
-            .expect("Should be an integer"),
-        );
+        sum += format!(
+            "{}{}",
+            first_number_cache.unwrap_or_default(),
+            last_number_cache.unwrap_or_default(),
+        )
+        .parse::<i32>()
+        .expect("Should be an integer");
     }
 
-    ints.iter().sum::<i32>().to_string()
+    sum.to_string()
 }
 
 impl Day for Day01 {

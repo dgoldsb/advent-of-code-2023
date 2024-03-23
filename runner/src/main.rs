@@ -27,13 +27,18 @@ use days::days_module::day_25::Day25;
 use helpers::read_file;
 use std::time::Instant;
 
-fn execute_day(day: &Box<dyn Day>) -> (String, String) {
+fn execute_day(day: &Box<dyn Day>) -> Result<(String, String), String> {
     // Get the input for this day.
-    let input = read_file(day.get_id()).expect("Expected input to exist");
+    let input_result = read_file(day.get_id());
 
+    if input_result.is_err() {
+        return Err("Expected input file to be present".to_string());
+    }
+
+    let input = input_result.unwrap();
     let solution_a = day.part_a(&input);
     let solution_b = day.part_b(&input);
-    return (solution_a, solution_b);
+    return Ok((solution_a, solution_b));
 }
 
 fn main() {
@@ -76,7 +81,7 @@ fn main() {
         let now = Instant::now();
 
         // Run the parts.
-        let solutions = execute_day(&day);
+        let solutions = execute_day(&day).unwrap_or_else(|_| ("".to_string(), "".to_string()));
 
         let runtime = format!(
             "{}.{} ms",
