@@ -2,8 +2,8 @@ use std::collections::HashSet;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
 pub struct GridIndex {
-    pub x: i32,
-    pub y: i32,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl GridIndex {

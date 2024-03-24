@@ -7,8 +7,8 @@ use std::str::FromStr;
 // We are doing a weird Dijkstra, our base node consists of coordinates, and some context how we got here.
 #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Hash)]
 struct Node {
-    coordinate: (i32, i32),
-    delta: (i32, i32),
+    coordinate: (isize, isize),
+    delta: (isize, isize),
     streak: usize,
 }
 
@@ -61,8 +61,8 @@ impl Node {
 
 // Returns the cost to reach the end.
 fn find_path(
-    start: (i32, i32),
-    end: (i32, i32),
+    start: (isize, isize),
+    end: (isize, isize),
     enter_cost_grid: &Grid,
     ultra_crucible: bool,
 ) -> u32 {
@@ -167,7 +167,7 @@ impl Day for Day17 {
 
     fn part_a(&self, input: &String) -> String {
         let grid = Grid::from_str(input).unwrap();
-        let size: i32 = (input.split("\n").next().unwrap().len() - 1)
+        let size: isize = (input.split("\n").next().unwrap().len() - 1)
             .try_into()
             .unwrap();
         find_path((0, 0), (size, size), &grid, false).to_string()
@@ -175,7 +175,7 @@ impl Day for Day17 {
 
     fn part_b(&self, input: &String) -> String {
         let grid = Grid::from_str(input).unwrap();
-        let size: i32 = (input.split("\n").next().unwrap().len() - 1)
+        let size: isize = (input.split("\n").next().unwrap().len() - 1)
             .try_into()
             .unwrap();
         find_path((0, 0), (size, size), &grid, true).to_string()

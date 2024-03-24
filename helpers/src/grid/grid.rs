@@ -1,12 +1,11 @@
 use crate::grid::cell::Cell;
 use crate::grid::grid_index::GridIndex;
 use core::slice::Iter;
-use std::collections::HashMap;
 use std::str::FromStr;
 
 pub struct Grid {
     cells: Vec<Cell>,
-    cell_map: HashMap<GridIndex, Cell>,
+    dimensions: (isize, isize),
 }
 
 impl Grid {
@@ -24,14 +23,21 @@ impl Grid {
     }
 
     pub fn get_cell(&self, index: &GridIndex) -> Option<&Cell> {
-        return self.cell_map.get(index);
+        self.get_cell_by_index(&(index.x, index.y))
     }
 
-    pub fn get_cell_by_index(&self, index: &(i32, i32)) -> Option<&Cell> {
-        return self.cell_map.get(&GridIndex {
-            x: index.0,
-            y: index.1,
-        });
+    pub fn get_cell_by_index(&self, index: &(isize, isize)) -> Option<&Cell> {
+        // Return None if the index is not in the grid.
+        if index.0 < 0
+            || index.0 >= self.dimensions.0
+            || index.1 < 0
+            || index.1 >= self.dimensions.1
+        {
+            return None;
+        }
+
+        let vec_index: usize = (index.0 * self.dimensions.1 + index.1).try_into().unwrap();
+        return Some(&self.cells[vec_index]);
     }
 }
 
@@ -41,6 +47,7 @@ impl FromStr for Grid {
     fn from_str(input: &str) -> Result<Grid, Self::Err> {
         let mut cells = Vec::new();
 
+        let mut max_column = 0;
         let mut row_index = 0;
         for line in input.split("\n") {
             let mut column_index = 0;
@@ -54,11 +61,11 @@ impl FromStr for Grid {
                 });
                 column_index += 1;
             }
+            max_column = column_index;
             row_index += 1;
         }
 
-        let cell_map = cells.iter().map(|c| (c.index, c.clone())).collect();
-
-        return Ok(Grid { cells, cell_map });
+        let dimensions = (row_index, max_column);
+        return Ok(Grid { cells, dimensions });
     }
 }

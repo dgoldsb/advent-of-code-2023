@@ -6,11 +6,11 @@ use std::str::FromStr;
 
 pub struct Day16 {}
 
-fn solve(input: &String, start: GridIndex, start_delta: (i32, i32)) -> usize {
+fn solve(input: &String, start: GridIndex, start_delta: (isize, isize)) -> usize {
     let grid = Grid::from_str(input).unwrap();
 
-    let mut beams: HashMap<GridIndex, HashSet<(i32, i32)>> = HashMap::new();
-    let mut queue: Vec<(GridIndex, (i32, i32))> = Vec::new();
+    let mut beams: HashMap<GridIndex, HashSet<(isize, isize)>> = HashMap::new();
+    let mut queue: Vec<(GridIndex, (isize, isize))> = Vec::new();
 
     queue.push((start, start_delta));
 
