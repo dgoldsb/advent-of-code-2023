@@ -1,96 +1,109 @@
 use crate::days_module::day::Day;
+use helpers::grid::cell::Cell;
 use helpers::grid::grid::Grid;
 use helpers::grid::grid_index::GridIndex;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub struct Day03 {}
 
-// Extract numbers from the engine schematic, plus their Moore's neighborhood.
-fn extract_numbers(grid: &Grid) -> Vec<(i32, HashSet<GridIndex>)> {
-    let mut result = Vec::new();
+fn is_part_number(cell: &Cell, grid: &Grid) -> bool {
+    for index in cell.index.moore_neighborhood() {
+        let cell_option = grid.get_cell(&index);
+        if cell_option.is_some() && cell_option.unwrap().is_symbol() {
+            return true;
+        }
+    }
+    false
+}
 
-    let mut digit_buffer = Vec::new();
-    let mut index_buffer = HashSet::new();
+fn extract_part_numbers(input: &String) -> Vec<usize> {
+    let grid = Grid::from_str(input).unwrap();
+
+    let mut result = Vec::new();
+    let mut cell_buffer: Vec<&Cell> = Vec::new();
 
     for cell in grid.iter() {
-        // If index is a new row, then flush buffer if any.
-        // If not a digit, flush buffer.
-        if (cell.index.y == 0 || !cell.value.is_digit(10)) && !index_buffer.is_empty() {
-            let moore_buffer = index_buffer
+        // End of current number.
+        if (cell.index.y == 0 || !cell.is_digit()) && !cell_buffer.is_empty() {
+            let number = cell_buffer
                 .iter()
-                .map(|cell: &GridIndex| cell.moore_neighborhood())
-                .flatten()
-                .collect::<HashSet<GridIndex>>();
-            let number = digit_buffer
-                .iter()
-                .cloned()
+                .map(|cell| cell.value)
                 .collect::<String>()
-                .parse::<i32>()
+                .parse::<usize>()
                 .unwrap();
 
-            result.push((number, moore_buffer));
+            for cell in &cell_buffer {
+                if is_part_number(cell, &grid) {
+                    result.push(number);
+                    break;
+                }
+            }
 
-            index_buffer.clear();
-            digit_buffer.clear();
+            cell_buffer.clear();
         }
 
-        // If it is a digit, add to buffer.
-        if cell.value.is_digit(10) {
-            digit_buffer.push(cell.value);
-            index_buffer.insert(cell.index);
+        // Extend buffer of current number.
+        if cell.is_digit() {
+            cell_buffer.push(cell);
         }
     }
 
-    result
+    return result;
 }
 
-fn extract_part_numbers(input: &String) -> Vec<i32> {
+fn extract_gear_ratios(input: &String) -> Vec<usize> {
     let grid = Grid::from_str(input).unwrap();
-    let mut result = Vec::new();
 
-    let symbol_grid_indices = grid
-        .iter()
-        .filter(|cell| cell.is_symbol())
-        .map(|cell| cell.index)
-        .collect::<HashSet<GridIndex>>();
+    let mut cell_buffer: Vec<&Cell> = Vec::new();
+    let mut gear_multiply_map = HashMap::new();
+    let mut gear_count_map = HashMap::new();
 
-    for (number, neighborhood) in extract_numbers(&grid) {
-        if !neighborhood.is_disjoint(&symbol_grid_indices) {
-            result.push(number)
+    for cell in grid.iter() {
+        // End of current number.
+        if (cell.index.y == 0 || !cell.is_digit()) && !cell_buffer.is_empty() {
+            let number = cell_buffer
+                .iter()
+                .map(|cell| cell.value)
+                .collect::<String>()
+                .parse::<usize>()
+                .unwrap();
+
+            // Avoid duplicate counts.
+            let mut seen = Vec::new();
+            for cell in &cell_buffer {
+                for neighbour_index in cell.index.moore_neighborhood() {
+                    if grid.get_cell(&neighbour_index).unwrap_or(cell).is('*') {
+                        if seen.contains(&neighbour_index) {
+                            continue;
+                        }
+
+                        let new_value =
+                            gear_multiply_map.get(&neighbour_index).unwrap_or(&1) * number;
+                        gear_multiply_map.insert(neighbour_index, new_value);
+
+                        let new_count = gear_count_map.get(&neighbour_index).unwrap_or(&0) + 1;
+                        gear_count_map.insert(neighbour_index, new_count);
+
+                        seen.push(neighbour_index);
+                    }
+                }
+            }
+
+            cell_buffer.clear();
+        }
+
+        // Extend buffer of current number.
+        if cell.is_digit() {
+            cell_buffer.push(cell);
         }
     }
 
-    result
-}
-
-fn extract_gear_ratios(input: &String) -> Vec<i32> {
-    let grid = Grid::from_str(input).unwrap();
-    let mut result = Vec::new();
-
-    // First get indices of all gears.
-    let gears = grid
+    gear_multiply_map
         .iter()
-        .filter(|cell| cell.value == '*')
-        .map(|cell| cell.index)
-        .collect::<HashSet<GridIndex>>();
-
-    // Also we need all numbers plus their neighborhood.
-    let extracted_numbers = extract_numbers(&grid);
-
-    // For each gear, if there are two matches we return the product.
-    for gear in gears {
-        let filtered_numbers = extracted_numbers
-            .iter()
-            .filter(|t| t.1.contains(&gear))
-            .map(|t| t.0)
-            .collect::<Vec<i32>>();
-        if filtered_numbers.len() == 2 {
-            result.push(filtered_numbers.iter().product());
-        }
-    }
-
-    result
+        .filter(|(k, v)| *gear_count_map.get(k).unwrap() == 2)
+        .map(|(k, v)| v.to_owned())
+        .collect::<Vec<usize>>()
 }
 
 impl Day for Day03 {
@@ -99,11 +112,14 @@ impl Day for Day03 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        extract_part_numbers(input).iter().sum::<i32>().to_string()
+        extract_part_numbers(input)
+            .iter()
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        extract_gear_ratios(input).iter().sum::<i32>().to_string()
+        extract_gear_ratios(input).iter().sum::<usize>().to_string()
     }
 }
 
