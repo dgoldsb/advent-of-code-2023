@@ -37,15 +37,6 @@ fn gcd(a: u128, b: u128) -> u128 {
     gcd(b, a % b)
 }
 
-fn multi_gcd(nums: &Vec<u128>, idx: usize) -> u128 {
-    if idx == nums.len() - 1 {
-        return nums[idx];
-    }
-    let a = nums[idx];
-    let b = multi_gcd(nums, idx + 1);
-    return gcd(a, b);
-}
-
 pub fn replace_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
     let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };
     assert!(idx < s_bytes.len());
@@ -79,8 +70,16 @@ pub fn transpose_string(input: &str) -> String {
     transposed_lines.join("\n")
 }
 
-pub fn lcm(nums: Vec<u128>) -> u128 {
-    nums.iter().product::<u128>() / multi_gcd(&nums, 0)
+fn base_lcm(a: u128, b: u128) -> u128 {
+    if a == 0 || b == 0 {
+        0
+    } else {
+        a * b / gcd(a, b)
+    }
+}
+
+pub fn lcm(numbers: &Vec<u128>) -> u128 {
+    numbers.iter().fold(1, |acc, &x| base_lcm(acc, x))
 }
 
 pub fn manhattan_distance(start: &(usize, usize), end: &(usize, usize)) -> usize {

@@ -64,8 +64,7 @@ impl Day for Day08 {
             .map(|s| find_period(s, &parsed_input).try_into().unwrap())
             .collect::<Vec<u128>>();
 
-        // TODO: Did the LCM quickly online for the leaderboard, this does not seem to work haha.
-        lcm(periods).to_string()
+        lcm(&periods).to_string()
     }
 }
 

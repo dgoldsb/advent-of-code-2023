@@ -50,6 +50,7 @@ fn main() {
     days.push(Box::new(Day05 {}));
     days.push(Box::new(Day06 {}));
     days.push(Box::new(Day07 {}));
+    days.push(Box::new(Day08 {}));
     days.push(Box::new(Day09 {}));
     days.push(Box::new(Day10 {}));
     days.push(Box::new(Day11 {}));
@@ -67,7 +68,6 @@ fn main() {
     days.push(Box::new(Day17 {}));
     days.push(Box::new(Day22 {}));
     // Unfinished days...
-    days.push(Box::new(Day08 {}));
     days.push(Box::new(Day20 {}));
     days.push(Box::new(Day23 {}));
 
