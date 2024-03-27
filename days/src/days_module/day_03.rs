@@ -1,7 +1,6 @@
 use crate::days_module::day::Day;
 use helpers::grid::cell::Cell;
 use helpers::grid::grid::Grid;
-use helpers::grid::grid_index::GridIndex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -101,8 +100,8 @@ fn extract_gear_ratios(input: &String) -> Vec<usize> {
 
     gear_multiply_map
         .iter()
-        .filter(|(k, v)| *gear_count_map.get(k).unwrap() == 2)
-        .map(|(k, v)| v.to_owned())
+        .filter(|(k, _)| *gear_count_map.get(k).unwrap() == 2)
+        .map(|(_, v)| v.to_owned())
         .collect::<Vec<usize>>()
 }
 
