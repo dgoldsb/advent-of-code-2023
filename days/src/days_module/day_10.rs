@@ -1,12 +1,31 @@
 use crate::days_module::day::Day;
-use std::collections::{HashMap, HashSet};
+use helpers::grid::cell::Cell;
+use helpers::grid::grid::Grid;
+use helpers::grid::grid_index::GridIndex;
+use std::collections::HashSet;
+use std::str::FromStr;
 
-fn find_starting_char(index: &(isize, isize), map: &HashMap<(isize, isize), char>) -> char {
-    let default = '.';
-    let up = map.get(&(index.0 - 1, index.1)).unwrap_or(&default);
-    let down = map.get(&(index.0 + 1, index.1)).unwrap_or(&default);
-    let left = map.get(&(index.0, index.1 - 1)).unwrap_or(&default);
-    let right = map.get(&(index.0, index.1 + 1)).unwrap_or(&default);
+fn find_starting_char(index: &(isize, isize), map: &Grid) -> char {
+    let default = Cell {
+        value: '.',
+        index: GridIndex { x: -1, y: -1 },
+    };
+    let up = &map
+        .get_cell_by_index(&(index.0 - 1, index.1))
+        .unwrap_or(&default)
+        .value;
+    let down = &map
+        .get_cell_by_index(&(index.0 + 1, index.1))
+        .unwrap_or(&default)
+        .value;
+    let left = &map
+        .get_cell_by_index(&(index.0, index.1 - 1))
+        .unwrap_or(&default)
+        .value;
+    let right = &map
+        .get_cell_by_index(&(index.0, index.1 + 1))
+        .unwrap_or(&default)
+        .value;
 
     if vec!['L', 'F', '-'].contains(left) {
         if vec!['F', '7', '|'].contains(up) {
@@ -27,24 +46,6 @@ fn find_starting_char(index: &(isize, isize), map: &HashMap<(isize, isize), char
     }
 
     return 'F';
-}
-
-fn find_char_index<'a>(target: char, map: &'a HashMap<(isize, isize), char>) -> &'a (isize, isize) {
-    map.iter()
-        .filter(|(_, v)| *v == &target)
-        .map(|(k, _)| k)
-        .next()
-        .expect("Target not found!")
-}
-
-fn parse_char_map(input: &String) -> HashMap<(isize, isize), char> {
-    let mut map = HashMap::new();
-    for (i, l) in input.split("\n").enumerate() {
-        for (j, v) in l.chars().enumerate() {
-            map.insert((i as isize, j as isize), v.clone());
-        }
-    }
-    map
 }
 
 fn get_neighbors(pipe: &char, index: &(isize, isize)) -> Vec<(isize, isize)> {
@@ -71,9 +72,10 @@ fn get_neighbors(pipe: &char, index: &(isize, isize)) -> Vec<(isize, isize)> {
     }
 }
 
-fn find_loop(map: &HashMap<(isize, isize), char>) -> HashSet<(isize, isize)> {
+fn find_loop(map: &Grid) -> HashSet<(isize, isize)> {
     let mut visited = HashSet::new();
-    let mut index = find_char_index('S', &map).clone();
+    let grid_index = map.find_index(&'S').unwrap().clone();
+    let mut index = (grid_index.x, grid_index.y);
     let mut char_ = find_starting_char(&index, map);
 
     loop {
@@ -83,7 +85,7 @@ fn find_loop(map: &HashMap<(isize, isize), char>) -> HashSet<(isize, isize)> {
         for neighbor in get_neighbors(&char_, &index) {
             if !visited.contains(&neighbor) {
                 index = neighbor;
-                char_ = *map.get(&index).unwrap();
+                char_ = map.get_cell_by_index(&index).unwrap().value;
                 updated = true;
             }
         }
@@ -103,12 +105,12 @@ impl Day for Day10 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let map = parse_char_map(input);
+        let map = Grid::from_str(input).unwrap();
         (find_loop(&map).len() / 2).to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        let map = parse_char_map(input);
+        let map = Grid::from_str(input).unwrap();
         let visited = find_loop(&map);
         let mut inner_squares = 0;
         for (x, line) in input.split("\n").enumerate() {
