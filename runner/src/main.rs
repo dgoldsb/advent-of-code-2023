@@ -56,6 +56,7 @@ fn main() {
     days.push(Box::new(Day11 {}));
     days.push(Box::new(Day12 {}));
     days.push(Box::new(Day13 {}));
+    days.push(Box::new(Day14 {}));
     days.push(Box::new(Day15 {}));
     days.push(Box::new(Day18 {}));
     days.push(Box::new(Day19 {}));
